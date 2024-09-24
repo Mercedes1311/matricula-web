@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import RegistroForm, LoginForm
 from .models import Usuario
 
-@login_required
+# @login_required
 def home(request):
     return render(request, "home.html")
 
