@@ -1,5 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
 {% block content %}
-<h1>Home</h1>
-<p>Esta es la página principal</p>
-<a href="{% url 'signout' %}">Cerrar sesión</a>
+
+    <main class="home">
+
+        <header>
+            <h1>.: BIENVENIDO A LA NUEVA INTRANET - UNFV</h1>
+        </header>
+        
+        <section class="content">
+            <div class="container_v_m">
+                <div class="mission-vision">
+                    <div class="mission">
+                        <h2>Misión</h2>
+                        <p>“La Universidad Nacional Federico Villarreal, desarrolla un compromiso de excelencia académica, formando profesionales competentes y socialmente responsables a través de la generación del conocimiento, promoción de la cultura y el pensamiento crítico, logrando un impacto positivo en su interacción con la región y con el país.”</p>
+                    </div>
+
+                    <div class="vision">
+                        <h2>Visión</h2>
+                        <p>“La Universidad Nacional Federico Villarreal, tiene como visión ser una Institución innovadora de liderazgo académico a través de un modelo educativo propio, generando beneficio a sus miembros y a la sociedad.”</p>
+                    </div>
+                </div>
+                <div class="datos">
+                    <iframe width="500" height="300" src="https://www.youtube.com/embed/mpmHAWICMok?si=cu4VTiuchgkkrIKj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+            </div>
+            <div class="espacio">
+            </div>
+
+            <a href="{% static 'pdfs/calendario_academico_2024.pdf' %}" download="calendario_academico_2024.pdf">
+                <div class="calendar">
+                    <strong>Calendario de actividades académicas 2024:</strong> Puede descargar el archivo en formato PDF haciendo clic en este enlace.</p>
+                </div>
+            </a>
+
+            <a href="{% static 'pdfs/Instructivo_matricula_presencial_regular_2024.pdf' %}" download="Instructivo_matricula_presencial_regular_2024.pdf">
+                <div class="news">
+                    <p><strong>Instructivo de Matrícula para estudiantes:</strong> Puede descargar el archivo en formato PDF haciendo clic aquí.</p>
+                </div>
+            </a>
+
+            <section class="directiva-section">
+                <header class="boletin">
+                    <h2>.: BOLETIN</h2>
+                </header>
+                <h2>DIRECTIVA DE MATRÍCULA 2024 - I</h2>
+                <p>La Universidad Nacional Federico Villarreal iniciará el proceso de matrículas 2024. A continuación les brindamos los recursos a tener en cuenta, el plan de estudios, la malla curricular y un video tutorial donde explica el proceso de la matrícula online.</p>
+                <div class="directiva-buttons">
+                    <div>
+                        <div>
+                            <i class="fa-solid fa-list"></i>
+                        </div>
+                        <a href="" class="btn-dark" download="Plan_Estudio_2024.pdf">
+                            <i class="fa fa-file-pdf"></i> Ver Plan de estudio
+                        </a>
+                    </div>
+                    <div>
+                        <div>
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </div>
+                        <a href="#" class="btn-dark" download="Malla_Curricular.pdf">
+                            <i class="fa fa-book"></i> Ver Malla
+                        </a>
+                    </div>
+                    <div>
+                        <div>
+                            <i class="fa-solid fa-video"></i>
+                        </div>
+                        <a href="#" class="btn-dark">
+                            <i class="fa fa-video"></i> Ver Video
+                        </a>
+                    </div>
+                    
+                </div>
+                <a href="#" class="btn-green">Ver el TARIFARIO 2024</a>
+            </section>
+            
+            <div class="redes">
+                <a href="https://www.facebook.com/UNFV.EDU">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+                <a href="https://www.unfv.edu.pe/">
+                    <i class="fa-solid fa-globe"></i>
+                </a>
+                <a href="https://www.instagram.com/unfvoficial?fbclid=IwZXh0bgNhZW0CMTAAAR1Znd2zaK6kQtu1anNVuZsMkt5o2US8Wjxe2nTvSKr4obzx67nxXSVH5Z0_aem_6kGC6nI9YEdQ7m9ssfxPtA">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a href="https://www.tiktok.com/@unfv?fbclid=IwZXh0bgNhZW0CMTAAAR1FG2tQFZ6iKryycimtg4-fGa9_FNfqjIdsDZX5svoLrukw6mNVqi5FHtQ_aem_RgMdtp74D_zb8rQDjJulsA">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+                <a href="https://www.linkedin.com/search/results/all/?fetchDeterministicClustersOnly=true&heroEntityKey=urn%3Ali%3Aorganization%3A783519&keywords=universidad%20nacional%20federico%20villarreal&origin=RICH_QUERY_SUGGESTION&position=0&searchId=94f4415c-474a-4625-9189-e052c237a92b&sid=39P&spellCorrectionEnabled=false">
+                    <i class="fa-brands fa-linkedin"></i>
+                </a>
+                <a href="https://www.youtube.com/@prensaunfv">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <a href="">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+            </div>
+
+            
+        </section>
+       
+    </main>
+
 {% endblock %}

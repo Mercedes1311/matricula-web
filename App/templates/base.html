@@ -4,12 +4,272 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titulo</title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            position: fixed; /* Hacer que la barra lateral sea fija */
+            height: 100%; /* Asegurar que ocupe toda la altura */
+        }
+
+        .sidebar-header h2 {
+            color: #ffc107;
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        nav ul li {
+            margin: 20px 0;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        nav ul li a:hover {
+            background-color: #495057;
+        }
+
+        .barra{
+            flex-grow: 1;
+            background-color: #f8f9fa;
+        }
+
+        header {
+            background-color: #ffc107;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            color: white;
+        }
+
+        .content {
+            margin-top: 20px;
+        }
+
+        .mission, .vision {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .links {
+            margin-top: 20px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #17a2b8;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #138496;
+        }
+
+        .calendar, .news {
+            background-color: #e9ecef;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .mission-vision {
+            width: 53%;
+            height: 200px;
+            padding: 5px;;
+        }
+
+        .container_v_m {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row; /* Cambiado a "row" para que estén uno al lado del otro */
+            justify-content: space-between;
+        }
+
+        .datos.iframe {
+            padding-left: 5px;
+        }
+        .content{
+            width: 100%;
+        }
+        .home{
+            flex-grow: 1;
+            background-color: #f8f9fa;
+            margin-right: 10px;
+            margin-left: 260px;
+        }
+        .espacio{
+            margin: 30px;
+        }
+        a{
+            text-decoration: none;
+            color:  #138496;
+        }
+        .directiva-section {
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .directiva-section h2 {
+            font-size: 1.5rem;
+            padding: 10px;
+        }
+
+        .directiva-section p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .directiva-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+
+        .directiva-buttons a {
+            padding: 10px 20px;
+            border-radius: 5px;
+            color: white;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-dark {
+            background-color: #181313b6;
+        }
+
+        .btn-red:hover, .btn-yellow:hover, .btn-blue:hover, .btn-green:hover {
+            opacity: 0.8;
+        }
+
+        .directiva-buttons i {
+            margin-right: 5px;
+        }
+        .redes{
+            text-align: center;
+        }
+        .boletin {
+            background-color: #17a2b8;
+            padding: 10px;
+            text-align: center;
+        }
+        .boletin h2 {
+            color: white;
+            margin: none;
+        }
+        .directiva-buttons div .fa-solid {
+            font-size: 140px;
+            margin: 10px;
+            color: #17a2b8;
+
+        }
+        .redes a {
+            margin-right: 10px;
+            transition: color 0.3s ease;
+            text-align: center;
+            font-size: 50px;
+        }
+
+        .fa-facebook {
+            color: #1877F2; /* Facebook azul */
+        }
+
+        .fa-globe {
+            color: #0a58ca; /* Página web genérica en azul */
+        }
+
+        .fa-instagram {
+            color: #E1306C; /* Instagram rosado */
+        }
+
+        .fa-tiktok {
+            color: #010101; /* TikTok negro */
+        }
+
+        .fa-linkedin {
+            color: #0077B5; /* LinkedIn azul */
+        }
+
+        .fa-youtube {
+            color: #FF0000; /* YouTube rojo */
+        }
+
+        .fa-x-twitter {
+            color: #1DA1F2; /* Twitter azul */
+        }
+
+        /* Hover para cambiar de color cuando se pase el mouse por encima */
+        .redes a:hover {
+            opacity: 0.8;
+        }
+
+    </style>
 </head>
 <body>
-    <main>
-        <div class="container mt-4">
-            {% block content %}
-            {% endblock %}
+    <main class="barra">
+        <div class="container">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>INTRANET ALUMNOS</h2>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="#">Inicio</a></li>
+                        <li><a href="#">Matrícula</a></li>
+                        <li><a href="{% url 'signout' %}">Cerrar Sesión</a></li>
+                    </ul>
+                </nav>
+            </aside>
+        <div class="content">
+            <div class="container mt-4">
+    
+                {% block content %}
+                {% endblock %}
+            </div>
         </div>
     </main>
 </body>
