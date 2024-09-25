@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm
+from .forms import RegistroForm, LoginForm, AlumnoForm
 from .models import Usuario
 
 # @login_required
@@ -43,3 +43,14 @@ def signin(request):
 def signout(request):
     logout(request)
     return redirect('signin')
+
+def matricula_view(request):
+    if request.method == 'POST':
+        form = AlumnoForm(request.POST)
+        if form.is_valid():
+            form.save()  # Esto guarda los datos en la base de datos  
+            messages.success(request, 'Datos del alumno guardados con éxito.')          
+            return redirect('matricula_view')  # Redirigir a una página de confirmación o donde quieras
+    else:
+        form = AlumnoForm()
+    return render(request, 'matricula.html', {'form': form})
