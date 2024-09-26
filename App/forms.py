@@ -3,25 +3,20 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Usuario, Alumno
 
 class RegistroForm(UserCreationForm):
+    codigo = forms.CharField(label='Código', max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password1 = forms.CharField(label='Contraseña', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    password2 = forms.CharField(label='Confirmar contraseña', widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
     class Meta:
         model = Usuario
-        fields = ['username', 'password1', 'password2']
+        fields = ['codigo', 'password1', 'password2']
 
-class LoginForm(AuthenticationForm):
-    username = forms.CharField(label="Usuario", max_length=100)
-    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput)
-
-class AlumnoForm(forms.ModelForm):
-    class Meta:
-        model = Alumno
-        fields = ['codigo_alumno', 'nombres', 'apellido_paterno', 'apellido_materno', 'plan', 'dni', 'correo', 'celular', 'escuela']
+    def clean_codigo(self):
+        codigo = self.cleaned_data.get('codigo')
+        if not Alumno.objects.filter(codigo=codigo).exists():
+            raise forms.ValidationError("Este código de alumno no existe. Por favor verifique.")
+        return codigo
     
-    codigo_alumno = forms.CharField(label="Código de Alumno", max_length=10)
-    nombres = forms.CharField(label="Nombres", max_length=100)
-    apellido_paterno = forms.CharField(label="Apellido Paterno", max_length=100)
-    apellido_materno = forms.CharField(label="Apellido Materno", max_length=100)
-    plan = forms.CharField(label="Plan", max_length=50)
-    dni = forms.CharField(label="DNI", max_length=8)
-    correo = forms.EmailField(label="Correo Electrónico")
-    celular = forms.CharField(label="Celular", max_length=9)
-    escuela = forms.CharField(label="Escuela", max_length=100)
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(label='Usuario', max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
