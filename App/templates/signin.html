@@ -7,41 +7,69 @@
     <style>
         body {
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            background-color: #ffffff;
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-attachment: fixed;
+        }
+        .container {
+            width: 400px;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
         }
         .btn-login {
-            background-color: #ed8765;
-            color: #000; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #ffcc00;
+            color: #333;
+            border: none;
+            width: 100%;
         }
-        .btn:hover {
-            background-color: #b11520;
-            color: #fff;
+        .btn-login:hover {
+            background-color: #e6b800;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .form-control {
+            border-color: #ccc;
+        }
+        .form-control:focus {
+            box-shadow: 0 0 0 0.2rem rgba(255, 204, 0, 0.25);
+        }
+        .register-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <main class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-6 col-lg-4">
-                <form action="/signin/" action="{% url 'signin' %}" method="POST">
-                    {% csrf_token %}
-                    <h1>Login Matrícula</h1>
-                    {{error}}
-                    {{ form.as_p }}
-                    <button class="btn btn-login">Ingresar</button>
-                </form>
-                <a href="{% url 'registro' %}">¿No tienes cuenta? Regístrate</a>
-            </div>
+        <div class="form-container">
+            <form action="{% url 'signin' %}" method="POST">
+                {% csrf_token %}
+                <h1>Iniciar Sesión</h1>
+            
+                <div class="form-group mb-3">
+                    {{ form.username.label_tag }}
+                    {{ form.username }}
+                </div>
+            
+                <div class="form-group mb-3">
+                    {{ form.password.label_tag }}
+                    {{ form.password }}
+                </div>
+            
+                <button class="btn btn-login">Ingresar</button>
+            </form>
+            <a class="register-link" href="{% url 'registro' %}">¿No tienes cuenta? Regístrate</a>
         </div>
     </main>
 </body>

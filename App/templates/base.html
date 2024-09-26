@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titulo</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         * {
@@ -25,7 +26,7 @@
 
         .sidebar {
             width: 250px;
-            background-color: #343a40;
+            background-color: #ff9100;
             color: white;
             padding: 20px;
             display: flex;
@@ -33,10 +34,12 @@
             align-items: flex-start;
             position: fixed; /* Hacer que la barra lateral sea fija */
             height: 100%; /* Asegurar que ocupe toda la altura */
+            left: 0; /* Fija la barra lateral completamente a la izquierda */
+            top: 0;  /* Fija la barra en la parte superior */
         }
 
         .sidebar-header h2 {
-            color: #ffc107;
+            color: #040404;
         }
 
         nav ul {
@@ -49,7 +52,7 @@
         }
 
         nav ul li a {
-            color: white;
+            color: #ffffff;
             text-decoration: none;
             display: block;
             padding: 10px;
@@ -58,7 +61,7 @@
         }
 
         nav ul li a:hover {
-            background-color: #495057;
+            background-color: #eaac5c;
         }
 
         .barra{
@@ -122,7 +125,7 @@
         .container_v_m {
             display: flex;
             flex-wrap: wrap;
-            flex-direction: row; /* Cambiado a "row" para que estén uno al lado del otro */
+            flex-direction: row; 
             justify-content: space-between;
         }
 
@@ -132,8 +135,29 @@
         .content{
             width: 100%;
         }
+
+        .Datos_Alumno{
+            width: calc(100% - 260px); /* Asegura que el ancho del contenido reste el tamaño de la barra lateral */
+            margin-left: 260px; /* Deja espacio para la barra lateral */
+            margin-top: 20px;   /* Mantiene el margen superior que ya tenías */
+            padding: 20px;      /* Agrega un relleno interno si es necesario */
+        }
+
+        .Datos_Alumno label {
+            display: inline-block;   /* Asegura que los labels y los campos estén en línea */
+            width: 150px;            /* Ajusta el ancho de los labels para que no estén muy pegados */
+            margin-bottom: 10px;     /* Añade espacio debajo de los labels */
+            margin-right: 20px;      /* Añade espacio a la derecha del label, separándolo del campo */
+        }
+
+        .Datos_Alumno input {
+            width: 30%;  /* Asegura que los campos de texto tomen el ancho restante */
+            margin-bottom: 10px;        /* Añade espacio debajo de los inputs */
+            padding: 5px;               /* Añade relleno dentro del campo de texto */
+        }
+
         .home{
-            flex-grow: 1;
+            width: calc(100% - 250px);
             background-color: #f8f9fa;
             margin-right: 10px;
             margin-left: 260px;
@@ -224,34 +248,33 @@
         }
 
         .fa-facebook {
-            color: #1877F2; /* Facebook azul */
+            color: #1877F2; 
         }
 
         .fa-globe {
-            color: #0a58ca; /* Página web genérica en azul */
+            color: #0a58ca;
         }
 
         .fa-instagram {
-            color: #E1306C; /* Instagram rosado */
+            color: #E1306C;
         }
 
         .fa-tiktok {
-            color: #010101; /* TikTok negro */
+            color: #010101; 
         }
 
         .fa-linkedin {
-            color: #0077B5; /* LinkedIn azul */
+            color: #0077B5;
         }
 
         .fa-youtube {
-            color: #FF0000; /* YouTube rojo */
+            color: #FF0000; 
         }
 
         .fa-x-twitter {
-            color: #1DA1F2; /* Twitter azul */
+            color: #1DA1F2; 
         }
 
-        /* Hover para cambiar de color cuando se pase el mouse por encima */
         .redes a:hover {
             opacity: 0.8;
         }
@@ -267,15 +290,35 @@
                 </div>
                 <nav>
                     <ul>
-                        <li><a href="#">Inicio</a></li>
-                        <li><a href="#">Matrícula</a></li>
-                        <li><a href="{% url 'signout' %}">Cerrar Sesión</a></li>
+                        <li class="nav-link">
+                            <a href="{% url 'home' %}">
+                                <i class="bi bi-house-door"></i>
+                                Inicio
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'perfil' username=request.user.username %}">
+                                <i class="bi bi-person"></i>
+                                Perfil
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="#">
+                                <i class="bi bi-envelope-paper"></i>
+                                Matrícula
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'signout' %}">
+                                <i class="bi bi-box-arrow-left"></i>
+                                Cerrar Sesión
+                            </a>
+                        </li>
                     </ul>
                 </nav>
             </aside>
         <div class="content">
-            <div class="container mt-4">
-    
+            <div class="container ml-8">
                 {% block content %}
                 {% endblock %}
             </div>
