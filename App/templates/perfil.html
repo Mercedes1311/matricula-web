@@ -1,18 +1,27 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="home">
-    <h1>Datos del Alumno</h1>
-    <div style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px; background-color: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
-        <p ><strong>Nombre de Usuario:</strong> {{ usuario.username }}</p>
-        <p><strong>Código:</strong> {{ alumno.codigo }}</p>
-        <p><strong>Nombres:</strong> {{ alumno.nombres }}</p>
-        <p><strong>Apellido Paterno:</strong> {{ alumno.apellido_paterno }}</p>
-        <p><strong>Apellido Materno:</strong> {{ alumno.apellido_materno }}</p>
-        <p><strong>DNI:</strong> {{ alumno.dni }}</p>
-        <p><strong>Correo:</strong> {{ alumno.correo }}</p>
-        <p><strong>Celular:</strong> {{ alumno.celular }}</p>
-        <p><strong>Escuela:</strong> {{ alumno.escuela.nombre_escuela }}</p>
-        <p><strong>Plan:</strong> {{ alumno.plan.nombre_plan }}</p>
+    <div class="conteiner-perfil">
+        <h1>Datos del Alumno</h1>
+        <div class="container-p">
+            <div class="form-perfil" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px; background-color: #f9f9f9; padding: 20px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">
+                <p><strong>Nombre de Usuario:</strong> {{ usuario.username }}</p>
+                <p><strong>Código:</strong> {{ alumno.codigo }}</p>
+                <p><strong>Nombres:</strong> {{ alumno.nombres }}</p>
+                <p><strong>Apellido Paterno:</strong> {{ alumno.apellido_paterno }}</p>
+                <p><strong>Apellido Materno:</strong> {{ alumno.apellido_materno }}</p>
+                <p><strong>DNI:</strong> {{ alumno.dni }}</p>
+                <p><strong>Correo:</strong> {{ alumno.correo }}</p>
+                <p><strong>Celular:</strong> {{ alumno.celular }}</p>
+                <p><strong>Escuela:</strong> {{ alumno.escuela.nombre_escuela }}</p>
+                <p><strong>Plan:</strong> {{ alumno.plan.nombre_plan }}</p>
+            </div>
+            <div class="img-perfil">
+                <img width="200px" src="https://mentor.pe/wp-content/uploads/2023/11/UNFV-admision-1024x576.jpg" alt="">
+            </div>
+        </div>
     </div>
 </div>
+
+
 {% endblock %}
