@@ -22,6 +22,7 @@
         .container {
             display: flex;
             width: 100%;
+            height: 100%;
         }
 
         .sidebar {
@@ -61,7 +62,7 @@
         }
 
         nav ul li a:hover {
-            background-color: #eaac5c;
+            background-color: #585147c2;
         }
 
         .barra{
@@ -278,6 +279,81 @@
         .redes a:hover {
             opacity: 0.8;
         }
+        .form-perfil{
+            display: flex;
+            justify-items: center;
+            height: 500px;
+            width: 400px;
+            justify-items: center;
+        }
+
+        .conteiner-perfil h1 {
+            background-color: #e9ecef;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #ffc107;
+            text-align: center;
+        }
+        
+       .form-perfil p {
+        margin: 7px;
+       }
+       .conteiner-p{
+        display: flex;
+        flex-wrap: wrap;
+       }
+
+
+.container-p {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap; /* Esto permite que en pantallas pequeñas, los elementos se ajusten */
+}
+
+.form-perfil {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    width: 40%; /* Ancho del formulario */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.img-perfil img {
+    width: 606px;
+    height: 500px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.conteiner-p {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.form-perfil p {
+    margin: 7px 0;
+}
+
+@media (max-width: 768px) {
+    .container-p {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-perfil, .img-perfil {
+        width: 100%;
+    }
+
+    .img-perfil img {
+        width: 100%;
+    }
+}
 
     </style>
 </head>
