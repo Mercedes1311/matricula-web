@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 class Usuario(AbstractUser):
     alumno = models.OneToOneField('Alumno', on_delete=models.CASCADE, null=True, blank=True)
-    
+
 class Plan (models.Model):
     id_plan = models.AutoField(primary_key=True)
     nombre_plan = models.CharField(max_length=100)
@@ -25,9 +25,9 @@ class Alumno(models.Model):
     nombres = models.CharField(max_length=100)
     apellido_paterno = models.CharField(max_length=100)
     apellido_materno = models.CharField(max_length=100)
-    dni = models.IntegerField(max_length=8)
+    dni = models.CharField(max_length=8)
     correo = models.EmailField(max_length=100)
-    celular = models.IntegerField(max_length=9)
+    celular = models.CharField(max_length=9)
     escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE)
 
     def __str__(self):
