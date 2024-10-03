@@ -1,34 +1,113 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    
-    <div class="Datos_Alumno">        
-        <h2>Datos del Alumno</h2>
+  <div class="Datos_Matricula">        
+    <h1>Matrícula de Cursos</h1>
 
-        {% if messages %}
-            <div id="message-container">
-                {% for message in messages %}
-                    <div class="alert alert-success">{{ message }}</div>  <!-- Mensaje de éxito -->
-                {% endfor %}
-            </div>
-        {% endif %}
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="form-group">
-                {{ form.as_p }}
-            </div>
-            <button type="submit" class="btn btn-primary" style="background-color: #ff9100;">Guardar</button>
-        </form>
+    <div class="Datos_Alumno">
+      <h3>Datos del Alumno</h3>
+      <p><strong>Código:</strong> {{ alumno.codigo }}</p>
+      <p><strong>DNI:</strong> {{ alumno.dni }}</p>
+      <p><strong>Apellido Paterno:</strong> {{ alumno.apellido_paterno }}</p>
+      <p><strong>Apellido Materno:</strong> {{ alumno.apellido_materno }}</p>
+      <p><strong>Nombres:</strong> {{ alumno.nombres }}</p>
+      <p><strong>Plan:</strong> {{ alumno.plan }}</p>
     </div>
 
-    <script>
-        setTimeout(function() {
-            const messageContainer = document.getElementById('message-container');
-            if (messageContainer) {
-                messageContainer.style.display = 'none';
-            }
-        }, 5000); // El mensaje desaparecerá después de 5000 ms (5 segundos)
-    </script>
+    <div>
+      <h3>Filtrar Cursos</h3>
+      <form method="POST">
+        {% csrf_token %}
+        <strong>{{ form_filtrar.semestre.label }}</strong>{{ form_filtrar.semestre }}
+        <button type="submit" name="filtrar_cursos" class="btn-filter">Filtrar Cursos</button>
+      </form>
+    </div>
+
+    <div>
+      <h3>Cursos Disponibles</h3>
+      {% if cursos_disponibles %}
+      <table class="tabla-canasta">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Turno</th>
+            <th>Sección</th>
+            <th>Asignaturas</th>
+            <th>Créditos</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for curso in cursos_disponibles %}
+          <tr>
+            <td>{{ curso.codigo }}</td>
+            <td>{{ curso.turno }}</td>
+            <td>{{ curso.seccion }}</td>
+            <td>{{ curso.nombre_curso }}</td>
+            <td>{{ curso.creditos }}</td>
+            <td>
+              <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="curso_id" value="{{ curso.id }}">
+                <button type="submit" class="btn-add">Añadir</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No hay cursos disponibles.</p>
+      {% endif %}
+    </div>
+
+    <div>
+      <h3>Cursos Seleccionados</h3>
+      {% if cursos_seleccionados %}
+      <table class="tabla-canasta">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Turno</th>
+            <th>Sección</th>
+            <th>Asignaturas</th>
+            <th>Créditos</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for curso in cursos_seleccionados %}
+          <tr>
+            <td>{{ curso.codigo }}</td>
+            <td>{{ curso.turno }}</td>
+            <td>{{ curso.seccion }}</td>
+            <td>{{ curso.nombre_curso }}</td>
+            <td>{{ curso.creditos }}</td>
+            <td>
+              <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="eliminar_curso_id" value="{{ curso.id }}">
+                <button type="submit" class="btn-eliminar">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No has seleccionado cursos.</p>
+      {% endif %}
+    </div>
     
+    <div>
+      <h3>Datos del Recibo</h3>
+      <form method="POST">
+        {% csrf_token %}
+        {{ form_matricula.numero_recibo.label }} {{ form_matricula.numero_recibo }}
+        {{ form_matricula.monto_recibo.label }} {{ form_matricula.monto_recibo }}
+        {{ form_matricula.fecha_recibo.label }} {{ form_matricula.fecha_recibo }}
+        <button type="submit" name="guardar_matricula" class="btn-filter">Guardar Matrícula</button>
+      </form>
+    </div>
+  </div>
 {% endblock %}

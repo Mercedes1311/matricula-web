@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 class Usuario(AbstractUser):
     alumno = models.OneToOneField('Alumno', on_delete=models.CASCADE, null=True, blank=True)
@@ -19,7 +20,7 @@ class Escuela (models.Model):
         return self.nombre_escuela
 
 class Alumno(models.Model):
-    id = models.AutoField(primary_key=True)
+    id_alumno = models.AutoField(primary_key=True)
     codigo = models.CharField(max_length=10, default=1)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     nombres = models.CharField(max_length=100)
@@ -29,6 +30,57 @@ class Alumno(models.Model):
     correo = models.EmailField(max_length=100)
     celular = models.CharField(max_length=9)
     escuela = models.ForeignKey(Escuela, on_delete=models.CASCADE)
+    anio = models.IntegerField(default=1)
 
     def __str__(self):
         return self.nombres + " " + self.apellido_paterno + " " + self.apellido_materno
+
+class Curso(models.Model):
+    id = models.AutoField(primary_key=True) 
+    codigo = models.CharField(max_length=10)
+    nombre_curso = models.CharField(max_length=100) 
+    semestre = models.IntegerField(default=1)
+    creditos = models.IntegerField() 
+    turno = models.CharField(
+        max_length=1,
+        choices=[('M', 'M'), ('T', 'T'), ('N', 'N')]
+    )
+    seccion = models.CharField(max_length=1, choices=[('A', 'A'), ('B', 'B'), ('C', 'C')]) 
+    prerrequisito = models.CharField(
+        max_length=10, 
+        null=True, 
+        blank=True, 
+    )
+    anio = models.IntegerField(default=1)
+    
+
+    def __str__(self):
+        return f"{self.codigo} - {self.nombre_curso} ({self.turno}{self.seccion})"
+    
+class CursoPrerrequisito(models.Model):
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+    fecha = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.alumno} - {self.curso} (Fecha: {self.fecha})"
+    
+class Boucher(models.Model):
+    id_boucher = models.AutoField(primary_key=True)
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    numero_boucher = models.CharField(max_length=50)
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"Boucher {self.numero_boucher} - {self.alumno}"
+
+class Matricula(models.Model):
+    id_matricula = models.AutoField(primary_key=True)
+    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
+    cursos = models.ManyToManyField(Curso)
+    boucher = models.ForeignKey(Boucher, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    fecha_matricula = models.DateField(default=timezone.now)
+
+    def __str__(self):
+        return f"Matricula {self.id_matricula} - Alumno: {self.alumno}"
