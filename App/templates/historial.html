@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="Historial_Matricula">
+    <h1>Historial de Matrícula</h1>
+    
+    <div>
+      <p><strong>Fecha:</strong>  {{ matricula.fecha_matricula }}</p>
+    </div>
+    <div>
+      <h3>Datos del Alumno</h3>
+      <p><strong>Código:</strong> {{ alumno.codigo }}</p>
+      <p><strong>DNI:</strong> {{ alumno.dni }}</p>
+      <p><strong>Apellido Paterno:</strong> {{ alumno.apellido_paterno }}</p>
+      <p><strong>Apellido Materno:</strong> {{ alumno.apellido_materno }}</p>
+      <p><strong>Nombres:</strong> {{ alumno.nombres }}</p>
+      <p><strong>Plan:</strong> {{ alumno.plan }}</p>
+    </div>
+
+    {% if boucher %}
+    <div>
+      <h3>Información del Boucher</h3>
+      <p><strong>Número de Boucher:</strong> {{ boucher.numero_boucher }}</p>
+      <p><strong>Monto:</strong> {{ boucher.monto }}</p>
+    </div>
+    {% else %}
+      <p>No hay información de boucher disponible.</p>
+    {% endif %}
+
+    <div>
+      <h3>Cursos Matriculados</h3>
+      {% if cursos %}
+      <table class="tabla-canasta">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Turno</th>
+            <th>Sección</th>
+            <th>Asignaturas</th>
+            <th>Créditos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for curso in cursos %}
+          <tr>
+            <td>{{ curso.codigo }}</td>
+            <td>{{ curso.turno }}</td>
+            <td>{{ curso.seccion }}</td>
+            <td>{{ curso.nombre_curso }}</td>
+            <td>{{ curso.creditos }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p>No hay cursos matriculados.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
