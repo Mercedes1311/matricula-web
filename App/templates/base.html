@@ -137,24 +137,53 @@
             width: 100%;
         }
 
-        .Datos_Alumno{
-            width: calc(100% - 260px); /* Asegura que el ancho del contenido reste el tamaño de la barra lateral */
-            margin-left: 260px; /* Deja espacio para la barra lateral */
-            margin-top: 20px;   /* Mantiene el margen superior que ya tenías */
-            padding: 20px;      /* Agrega un relleno interno si es necesario */
+        .Datos_Matricula h1, .Historial_Matricula h1 {
+            background-color: #e9ecef;
+            padding: 20px;
+            border-left: 4px solid #ffc107;
+            text-align: center;
         }
 
-        .Datos_Alumno label {
-            display: inline-block;   /* Asegura que los labels y los campos estén en línea */
-            width: 150px;            /* Ajusta el ancho de los labels para que no estén muy pegados */
-            margin-bottom: 10px;     /* Añade espacio debajo de los labels */
-            margin-right: 20px;      /* Añade espacio a la derecha del label, separándolo del campo */
+        .Datos_Matricula h3, .Historial_Matricula h3 {
+            background-color: #eaf0f2;
+            padding: 10px;
+            border-left: 4px solid #f4d883;
+            margin-bottom: 10px;
         }
 
-        .Datos_Alumno input {
-            width: 30%;  /* Asegura que los campos de texto tomen el ancho restante */
-            margin-bottom: 10px;        /* Añade espacio debajo de los inputs */
-            padding: 5px;               /* Añade relleno dentro del campo de texto */
+        .Datos_Matricula, .Historial_Matricula{
+            width: calc(100% - 240px); 
+            margin-left: 240px;
+            margin-top: -20px;
+            padding: 20px; 
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .Datos_Matricula input {
+            width: 30%; 
+            margin-bottom: 10px;
+            padding: 5px;      
+        }
+
+        .Datos_Matricula .Datos_Alumno {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .Datos_Matricula 
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
         }
 
         .home{
@@ -166,7 +195,8 @@
         .espacio{
             margin: 30px;
         }
-        a{
+        
+        a {
             text-decoration: none;
             color:  #138496;
         }
@@ -303,57 +333,125 @@
         flex-wrap: wrap;
        }
 
+        .container-p {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap; /* Esto permite que en pantallas pequeñas, los elementos se ajusten */
+        }
 
-.container-p {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap; /* Esto permite que en pantallas pequeñas, los elementos se ajusten */
-}
+        .form-perfil {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            width: 40%; /* Ancho del formulario */
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-.form-perfil {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 10px;
-    width: 40%; /* Ancho del formulario */
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+        .img-perfil img {
+            width: 606px;
+            height: 500px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
 
-.img-perfil img {
-    width: 606px;
-    height: 500px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
+        .conteiner-p {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
 
-.conteiner-p {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
+        .form-perfil p {
+            margin: 7px 0;
+        }
 
-.form-perfil p {
-    margin: 7px 0;
-}
+        @media (max-width: 768px) {
+            .container-p {
+                flex-direction: column;
+                align-items: center;
+            }
 
-@media (max-width: 768px) {
-    .container-p {
-        flex-direction: column;
-        align-items: center;
-    }
+            .form-perfil, .img-perfil {
+                width: 100%;
+            }
 
-    .form-perfil, .img-perfil {
+            .img-perfil img {
+                width: 100%;
+            }
+        }
+        
+        .tabla-canasta {
         width: 100%;
-    }
+        border-collapse: collapse;
+        margin-top: 20px;
+        }
 
-    .img-perfil img {
-        width: 100%;
-    }
-}
+        .tabla-canasta th,
+        .tabla-canasta td {
+        padding: 12px 15px;
+        text-align: left;
+        }
+
+        .tabla-canasta thead {
+        background-color: #ffc107;
+        color: white;
+        }
+
+        .tabla-canasta tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+        }
+
+        .tabla-canasta tbody tr:hover {
+        background-color: #ddd;
+        }
+
+        .tabla-canasta th {
+        font-weight: bold;
+        border-bottom: 2px solid #ddd;
+        }
+
+        .tabla-canasta td {
+        border-bottom: 1px solid #ddd;
+        }
+
+        .btn-eliminar {
+            background-color: #ff4d4d;
+        }
+
+        .btn-add {
+            background-color: #4CAF50;
+        }
+
+        .btn-add, .btn-eliminar {
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-eliminar:hover {
+        background-color: #ff1a1a;
+        }
+
+        .btn-add:hover {
+            background-color: #45a049; 
+        }
+
+        .btn-filter {
+            background-color: #eca20e;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
 
     </style>
 </head>
@@ -379,9 +477,15 @@
                             </a>
                         </li>
                         <li class="nav-link">
-                            <a href="#">
+                            <a href="{% url 'matricula' %}">
                                 <i class="bi bi-envelope-paper"></i>
                                 Matrícula
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'historial' %}">
+                                <i class="bi bi-book"></i>
+                                Historial
                             </a>
                         </li>
                         <li class="nav-link">
