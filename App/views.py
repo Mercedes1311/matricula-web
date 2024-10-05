@@ -69,7 +69,7 @@ def matricula(request):
     form_matricula = MatriculaForm()
 
     cursos_disponibles = []  
-    cursos_seleccionados = request.session.get('cursos_seleccionados', [])  # Cursos en la canasta
+    cursos_seleccionados = request.session.get('cursos_seleccionados', []) 
 
     if request.method == 'POST':
         if 'filtrar_cursos' in request.POST:
@@ -77,7 +77,6 @@ def matricula(request):
             if form_filtrar.is_valid():
                 semestre_seleccionado = form_filtrar.cleaned_data['semestre']
                 
-                # Filtrar los cursos según el semestre seleccionado
                 cursos_aprobados = CursoPrerrequisito.objects.filter(alumno=alumno).values_list('curso__codigo', flat=True)
                 cursos_disponibles = Curso.objects.filter(anio=alumno.anio, semestre=semestre_seleccionado)
 
@@ -96,14 +95,12 @@ def matricula(request):
                 numero_recibo = form_matricula.cleaned_data['numero_recibo']
                 monto_recibo = form_matricula.cleaned_data['monto_recibo']
                 
-                # Crear un boucher con los datos proporcionados
                 boucher = Boucher.objects.create(
                     alumno=alumno,
                     numero_boucher=numero_recibo,
                     monto=monto_recibo
                 )
                 
-                # Crear la matrícula con los cursos seleccionados
                 matricula = Matricula.objects.create(
                     alumno=alumno,
                     boucher=boucher,
@@ -111,17 +108,14 @@ def matricula(request):
                     fecha_matricula=timezone.now()
                 )
 
-                # Añadir los cursos seleccionados a la matrícula
                 matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
 
-                # Limpiar la canasta de cursos después de guardar
                 request.session['cursos_seleccionados'] = []
 
                 messages.success(request, "Matrícula guardada con éxito.")
 
 
         elif 'curso_id' in request.POST:
-            # Añadir curso a la canasta
             curso_id = request.POST.get('curso_id')
             if curso_id and int(curso_id) not in cursos_seleccionados:
                 curso = get_object_or_404(Curso, id=int(curso_id))
@@ -157,10 +151,8 @@ def matricula(request):
 
 @login_required
 def historial(request):
-    # Obtiene el usuario actual
     usuario = request.user
     
-    # Asegúrate de que el usuario tenga un objeto Alumno asociado
     alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
 
     matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
