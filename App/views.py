@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm
-from .models import Alumno, Usuario
+from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
+from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
+from django.utils import timezone
 
 @login_required
 def home(request):
@@ -53,7 +54,121 @@ def signout(request):
     logout(request)
     return redirect('signin')
 
+@login_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username) 
     alumno = usuario.alumno
     return render(request, 'perfil.html', {'usuario': usuario, 'alumno': alumno})
+
+@login_required
+def matricula(request):
+    usuario = request.user
+    alumno = get_object_or_404(Usuario, username=usuario.username).alumno
+
+    form_filtrar = FiltrarCursosForm()
+    form_matricula = MatriculaForm()
+
+    cursos_disponibles = []  
+    cursos_seleccionados = request.session.get('cursos_seleccionados', [])  # Cursos en la canasta
+
+    if request.method == 'POST':
+        if 'filtrar_cursos' in request.POST:
+            form_filtrar = FiltrarCursosForm(request.POST)
+            if form_filtrar.is_valid():
+                semestre_seleccionado = form_filtrar.cleaned_data['semestre']
+                
+                # Filtrar los cursos según el semestre seleccionado
+                cursos_aprobados = CursoPrerrequisito.objects.filter(alumno=alumno).values_list('curso__codigo', flat=True)
+                cursos_disponibles = Curso.objects.filter(anio=alumno.anio, semestre=semestre_seleccionado)
+
+                cursos_a_excluir = []
+                for curso in cursos_disponibles:
+                    if curso.prerrequisito and curso.prerrequisito not in cursos_aprobados:
+                        cursos_prerrequisitos = Curso.objects.filter(codigo=curso.prerrequisito)
+                        if cursos_prerrequisitos.exists() and cursos_prerrequisitos.first().anio != alumno.anio:
+                            cursos_a_excluir.append(curso.codigo)
+
+                cursos_disponibles = cursos_disponibles.exclude(codigo__in=cursos_a_excluir).order_by('nombre_curso')
+
+        elif 'guardar_matricula' in request.POST:
+            form_matricula = MatriculaForm(request.POST)
+            if form_matricula.is_valid():
+                numero_recibo = form_matricula.cleaned_data['numero_recibo']
+                monto_recibo = form_matricula.cleaned_data['monto_recibo']
+                
+                # Crear un boucher con los datos proporcionados
+                boucher = Boucher.objects.create(
+                    alumno=alumno,
+                    numero_boucher=numero_recibo,
+                    monto=monto_recibo
+                )
+                
+                # Crear la matrícula con los cursos seleccionados
+                matricula = Matricula.objects.create(
+                    alumno=alumno,
+                    boucher=boucher,
+                    plan=alumno.plan,
+                    fecha_matricula=timezone.now()
+                )
+
+                # Añadir los cursos seleccionados a la matrícula
+                matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
+
+                # Limpiar la canasta de cursos después de guardar
+                request.session['cursos_seleccionados'] = []
+
+                messages.success(request, "Matrícula guardada con éxito.")
+
+
+        elif 'curso_id' in request.POST:
+            # Añadir curso a la canasta
+            curso_id = request.POST.get('curso_id')
+            if curso_id and int(curso_id) not in cursos_seleccionados:
+                curso = get_object_or_404(Curso, id=int(curso_id))
+                creditos_actuales = sum(curso.creditos for curso in Curso.objects.filter(id__in=cursos_seleccionados))
+
+                if creditos_actuales + curso.creditos <= 22:
+                    cursos_seleccionados.append(int(curso_id))
+                    request.session['cursos_seleccionados'] = cursos_seleccionados
+                else:
+                    messages.error(request, "No puedes añadir más cursos. El límite es 22 créditos.")
+
+            return redirect('matricula')
+
+        elif 'eliminar_curso_id' in request.POST:
+            curso_id = request.POST.get('eliminar_curso_id')
+            if curso_id and int(curso_id) in cursos_seleccionados:
+                cursos_seleccionados.remove(int(curso_id))
+                request.session['cursos_seleccionados'] = cursos_seleccionados
+
+            return redirect('matricula')
+
+    cursos_en_canasta = Curso.objects.filter(id__in=cursos_seleccionados)
+    creditos_actuales = sum(curso.creditos for curso in cursos_en_canasta)
+
+    return render(request, 'matricula.html', {
+        'form_filtrar': form_filtrar,
+        'form_matricula': form_matricula,
+        'alumno': alumno,
+        'cursos_disponibles': cursos_disponibles,
+        'cursos_seleccionados': cursos_en_canasta,
+        'creditos_actuales': creditos_actuales,
+    })
+
+@login_required
+def historial(request):
+    # Obtiene el usuario actual
+    usuario = request.user
+    
+    # Asegúrate de que el usuario tenga un objeto Alumno asociado
+    alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
+
+    matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
+
+    context = {
+        'alumno': alumno,
+        'matricula': matricula,
+        'cursos': matricula.cursos.all() if matricula else [],  
+        'boucher': matricula.boucher if matricula else None
+    }
+    return render(request, 'historial.html', context)
