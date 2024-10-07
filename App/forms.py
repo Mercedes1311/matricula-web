@@ -17,7 +17,7 @@ class RegistroForm(UserCreationForm):
         if not Alumno.objects.filter(codigo=codigo).exists():
             raise forms.ValidationError("Este código de alumno no existe. Por favor verifique.")
         return codigo
-    
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label='Usuario', max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
@@ -28,3 +28,7 @@ class FiltrarCursosForm(forms.Form):
 class MatriculaForm(forms.Form):
     numero_recibo = forms.CharField(label='Número de Recibo: ', max_length=20, required=True)
     monto_recibo = forms.DecimalField(label='Monto del Recibo: ', max_digits=10, decimal_places=2, required=True)
+
+class LoginConsejeroForm(AuthenticationForm):
+    username = forms.CharField(label='DNI', max_length=8, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Titulo</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -325,13 +325,14 @@
             text-align: center;
         }
         
-       .form-perfil p {
+        .form-perfil p {
         margin: 7px;
-       }
-       .conteiner-p{
+        }
+
+        .conteiner-p{
         display: flex;
         flex-wrap: wrap;
-       }
+        }
 
         .container-p {
             display: flex;
@@ -348,7 +349,7 @@
             background-color: #f9f9f9;
             padding: 20px;
             border-radius: 10px;
-            width: 40%; /* Ancho del formulario */
+            width: 40%;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -486,6 +487,12 @@
                             <a href="{% url 'historial' %}">
                                 <i class="bi bi-book"></i>
                                 Historial
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'solicitud' %}">
+                                <i class="bi bi-book"></i>
+                                Solicitudes
                             </a>
                         </li>
                         <li class="nav-link">

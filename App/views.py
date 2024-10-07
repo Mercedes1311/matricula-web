@@ -2,9 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
+from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, LoginConsejeroForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
+from .decorators import admin_required
 
 @login_required
 def home(request):
@@ -49,6 +50,22 @@ def signin(request):
     else:
         form = LoginForm()
     return render(request, 'signin.html', {'form': form} )
+
+def signin_consejero(request):
+    if request.method == 'POST':
+        form = LoginConsejeroForm(data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home') 
+            else:
+                messages.error(request, 'Credenciales inválidas.')
+    else:
+        form = LoginConsejeroForm()
+    return render(request, 'signin_consejero.html', {'form': form})
 
 def signout(request):
     logout(request)
@@ -164,3 +181,8 @@ def historial(request):
         'boucher': matricula.boucher if matricula else None
     }
     return render(request, 'historial.html', context)
+
+@admin_required
+def solicitud(request):
+    # Lógica para mostrar las solicitudes
+    return render(request, 'solicitud.html')
