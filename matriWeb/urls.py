@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from App import views
 
 urlpatterns = [
@@ -11,4 +11,5 @@ urlpatterns = [
     path('usuario/<str:username>/', views.perfil, name='perfil'),
     path('matricula/', views.matricula, name='matricula'),
     path('historial/', views.historial, name='historial'),
+    path('solicitud/', views.solicitud, name='solicitud'),
 ]

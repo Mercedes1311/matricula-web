@@ -5,6 +5,7 @@ from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
+from .decorators import consejero_required
 
 @login_required
 def home(request):
@@ -25,6 +26,7 @@ def registro(request):
             usuario = form.save(commit=False)
             usuario.username = codigo
             usuario.alumno = alumno
+            usuario.rol = 'alumno'
             usuario.save()
             
             raw_password = form.cleaned_data.get('password1')
@@ -100,20 +102,15 @@ def matricula(request):
                     numero_boucher=numero_recibo,
                     monto=monto_recibo
                 )
-                
                 matricula = Matricula.objects.create(
                     alumno=alumno,
                     boucher=boucher,
                     plan=alumno.plan,
                     fecha_matricula=timezone.now()
                 )
-
                 matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
-
                 request.session['cursos_seleccionados'] = []
-
                 messages.success(request, "Matrícula guardada con éxito.")
-
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
@@ -152,9 +149,7 @@ def matricula(request):
 @login_required
 def historial(request):
     usuario = request.user
-    
     alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
-
     matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
 
     context = {
@@ -164,3 +159,8 @@ def historial(request):
         'boucher': matricula.boucher if matricula else None
     }
     return render(request, 'historial.html', context)
+
+@consejero_required
+def solicitud(request):
+    # Lógica para mostrar las solicitudes
+    return render(request, 'solicitud.html')
