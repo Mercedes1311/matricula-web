@@ -2,10 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, LoginConsejeroForm
+from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
-from .decorators import admin_required
+from .decorators import consejero_required
 
 @login_required
 def home(request):
@@ -26,6 +26,7 @@ def registro(request):
             usuario = form.save(commit=False)
             usuario.username = codigo
             usuario.alumno = alumno
+            usuario.rol = 'alumno'  # Asignar el rol de 'alumno' al usuario
             usuario.save()
             
             raw_password = form.cleaned_data.get('password1')
@@ -51,7 +52,7 @@ def signin(request):
         form = LoginForm()
     return render(request, 'signin.html', {'form': form} )
 
-def signin_consejero(request):
+""" def signin_consejero(request):
     if request.method == 'POST':
         form = LoginConsejeroForm(data=request.POST)
         if form.is_valid():
@@ -65,7 +66,7 @@ def signin_consejero(request):
                 messages.error(request, 'Credenciales inválidas.')
     else:
         form = LoginConsejeroForm()
-    return render(request, 'signin_consejero.html', {'form': form})
+    return render(request, 'signin_consejero.html', {'form': form}) """
 
 def signout(request):
     logout(request)
@@ -117,20 +118,15 @@ def matricula(request):
                     numero_boucher=numero_recibo,
                     monto=monto_recibo
                 )
-                
                 matricula = Matricula.objects.create(
                     alumno=alumno,
                     boucher=boucher,
                     plan=alumno.plan,
                     fecha_matricula=timezone.now()
                 )
-
                 matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
-
                 request.session['cursos_seleccionados'] = []
-
                 messages.success(request, "Matrícula guardada con éxito.")
-
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
@@ -169,9 +165,7 @@ def matricula(request):
 @login_required
 def historial(request):
     usuario = request.user
-    
     alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
-
     matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
 
     context = {
@@ -182,7 +176,7 @@ def historial(request):
     }
     return render(request, 'historial.html', context)
 
-@admin_required
+@consejero_required
 def solicitud(request):
     # Lógica para mostrar las solicitudes
     return render(request, 'solicitud.html')

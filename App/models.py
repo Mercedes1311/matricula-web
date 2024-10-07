@@ -3,14 +3,19 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 class Usuario(AbstractUser):
+    ROLES = [
+        ('alumno', 'Alumno'),
+        ('consejero', 'Consejero'),
+    ]
+    rol = models.CharField(max_length=10, choices=ROLES)
     alumno = models.OneToOneField('Alumno', on_delete=models.CASCADE, null=True, blank=True)
 
 class Consejero(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-    dni = models.CharField(max_length=8, unique=True)  # Asumiendo que el DNI tiene 8 caracteres
+    dni = models.CharField(max_length=8, unique=True)
 
     def __str__(self):
-        return self.usuario.username  # Retorna el nombre de usuario del consejero
+        return self.usuario.username
 
 class Plan (models.Model):
     id_plan = models.AutoField(primary_key=True)
@@ -59,7 +64,6 @@ class Curso(models.Model):
         blank=True, 
     )
     anio = models.IntegerField(default=1)
-    
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_curso} ({self.turno}{self.seccion})"
