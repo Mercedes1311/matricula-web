@@ -26,7 +26,7 @@ def registro(request):
             usuario = form.save(commit=False)
             usuario.username = codigo
             usuario.alumno = alumno
-            usuario.rol = 'alumno'  # Asignar el rol de 'alumno' al usuario
+            usuario.rol = 'alumno'
             usuario.save()
             
             raw_password = form.cleaned_data.get('password1')
@@ -51,22 +51,6 @@ def signin(request):
     else:
         form = LoginForm()
     return render(request, 'signin.html', {'form': form} )
-
-""" def signin_consejero(request):
-    if request.method == 'POST':
-        form = LoginConsejeroForm(data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(request, username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect('home') 
-            else:
-                messages.error(request, 'Credenciales inválidas.')
-    else:
-        form = LoginConsejeroForm()
-    return render(request, 'signin_consejero.html', {'form': form}) """
 
 def signout(request):
     logout(request)
