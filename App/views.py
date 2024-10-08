@@ -6,6 +6,8 @@ from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
 from .decorators import consejero_required
+from django.db.models import Max
+from django.http import HttpResponseForbidden
 
 @login_required
 def home(request):
@@ -162,5 +164,67 @@ def historial(request):
 
 @consejero_required
 def solicitud(request):
-    # Lógica para mostrar las solicitudes
-    return render(request, 'solicitud.html')
+    # Obtener la última matrícula de cada alumno
+    matriculas = Matricula.objects.filter(
+        id_matricula__in=Matricula.objects.values('alumno').annotate(ultima_matricula=Max('id_matricula')).values('ultima_matricula')
+    ).select_related('alumno').order_by('-fecha_matricula')
+
+    context = {
+        'matriculas': matriculas
+    }
+
+    return render(request, 'solicitud.html', context)
+
+@login_required
+@consejero_required
+def ver_matricula(request, id_matricula):
+    matricula = get_object_or_404(Matricula, id_matricula=id_matricula)
+    cursos = matricula.cursos.all()  # Obtener los cursos de la matrícula
+
+    return render(request, 'ver.html', {
+        'matricula': matricula,
+        'cursos': cursos,
+    })
+    
+# Función para renderizar el estado de matrícula
+def estado_matricula(request):
+    
+    alumno = request.user.alumno  # Suponiendo que el usuario está autenticado y vinculado a un alumno
+
+    # Busca la última matrícula del alumno
+    matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()  
+
+    return render(request, 'estado.html', {'matricula': matricula})
+
+def aprobar_matricula(request, matricula_id):
+
+    # Obtener la matrícula por su ID
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+
+    # Cambiar el estado de la matrícula a 'aprobado'
+    if matricula.estado == 'pendiente':
+        matricula.estado = 'aprobado'
+        matricula.save()
+
+    # Redirigir a la misma página o a una página de confirmación
+    return redirect('ver_matricula', id_matricula=matricula.id_matricula)
+
+def rechazar_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+
+    if request.method == 'POST':
+        mensaje_rechazo = request.POST.get('mensaje_rechazo', '').strip()
+
+        # Verifica que haya un mensaje de rechazo antes de rechazar
+        if mensaje_rechazo:
+            matricula.estado = 'rechazado'
+            matricula.mensaje_rechazo = mensaje_rechazo
+            matricula.save()
+        else:
+            # Si no hay mensaje, puedes agregar una lógica para manejar el error
+            return render(request, 'ver.html', {
+                'matricula': matricula,
+                'error': 'Debes proporcionar un motivo de rechazo.'
+            })
+
+    return redirect('ver_matricula', matricula_id=matricula.id_matricula)
