@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="home">
+    <div class="estado" >
+        <h1>Estado de matrícula</h1>
+    </div>
+    <div class="estado-content">
+        {% if matricula %}
+            <div class="estado-detalle">
+                <h3>Solicitud de matrícula:</h3>
+                <br>
+                <!-- <label><strong>Solicitud de matrícula:</strong></label> -->
+                <button class="estado-boton" disabled>{{ matricula.estado }}</button>
+                <!-- <input type="text" value="{{ matricula.estado }}" readonly> -->
+            </div>
+
+            <br>
+
+            {% if matricula.estado == 'rechazado' %}
+                <div class="estado-mensaje">
+                    <h3>Motivo del rechazo:</h3>
+                    <br>
+                    <div class="mensaje alerta-rechazo">
+                        <p>{{ matricula.mensaje_rechazo }}</p>
+                    </div>
+                </div>
+            {% elif matricula.estado == 'aprobado' %}
+                <div class="estado-mensaje">
+                    <h3>Motivo de la aprobación:</h3>
+                    <br>
+                    <div class="mensaje alerta-aprobado">
+                        <p>{{ matricula.mensaje_aprobacion }}</p>
+                    </div>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="estado-vacio">
+                <p>No tienes ninguna matrícula registrada.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
