@@ -11,6 +11,11 @@
                 <h3>Motivo del rechazo:</h3>
                 <p>{{ matricula.mensaje_rechazo }}</p>
             </div>
+        {% elif matricula.estado == 'aprobado' %}
+            <div>
+                <h3>Motivo de la aprobación:</h3>
+                <p>{{ matricula.mensaje_aprobacion }}</p>
+            </div>
         {% endif %}
     {% else %}
         <p>No tienes ninguna matrícula registrada.</p>

@@ -197,14 +197,26 @@ def estado_matricula(request):
     return render(request, 'estado.html', {'matricula': matricula})
 
 def aprobar_matricula(request, matricula_id):
-
     # Obtener la matrícula por su ID
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
-    # Cambiar el estado de la matrícula a 'aprobado'
-    if matricula.estado == 'pendiente':
-        matricula.estado = 'aprobado'
-        matricula.save()
+    if request.method == 'POST':
+        # Obtener el mensaje de aprobación del formulario
+        mensaje_aprobacion = request.POST.get('mensaje_aprobacion', '').strip()
+
+        # Verifica que haya un mensaje de aprobación antes de aprobar
+        if mensaje_aprobacion:
+            matricula.estado = 'aprobado'
+            matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
+            
+            # Guardar los cambios en la matrícula
+            matricula.save()
+        else:
+            # Si no hay mensaje, puedes agregar una lógica para manejar el error
+            return render(request, 'ver.html', {
+                'matricula': matricula,
+                'error': 'Debes proporcionar un motivo de aprobación.'
+            })
 
     # Redirigir a la misma página o a una página de confirmación
     return redirect('ver_matricula', id_matricula=matricula.id_matricula)
