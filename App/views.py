@@ -61,12 +61,16 @@ def signout(request):
 @login_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username) 
+    if usuario.rol == 'consejero':
+        return redirect('home') 
     alumno = usuario.alumno
     return render(request, 'perfil.html', {'usuario': usuario, 'alumno': alumno})
 
 @login_required
 def matricula(request):
     usuario = request.user
+    if usuario.rol == 'consejero':
+        return redirect('home') 
     alumno = get_object_or_404(Usuario, username=usuario.username).alumno
 
     form_filtrar = FiltrarCursosForm()
@@ -151,6 +155,8 @@ def matricula(request):
 @login_required
 def historial(request):
     usuario = request.user
+    if usuario.rol == 'consejero':
+        return redirect('home')
     alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
     matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
 
@@ -164,7 +170,6 @@ def historial(request):
 
 @consejero_required
 def solicitud(request):
-    # Obtener la última matrícula de cada alumno
     matriculas = Matricula.objects.filter(
         id_matricula__in=Matricula.objects.values('alumno').annotate(ultima_matricula=Max('id_matricula')).values('ultima_matricula')
     ).select_related('alumno').order_by('-fecha_matricula')
@@ -188,12 +193,20 @@ def ver_matricula(request, id_matricula):
     
 # Función para renderizar el estado de matrícula
 def estado_matricula(request):
+
+    usuario = request.user
     
-    alumno = request.user.alumno  # Suponiendo que el usuario está autenticado y vinculado a un alumno
+    # Verificar si el usuario tiene el rol de consejero
+    if usuario.rol == 'consejero':
+        return redirect('home')  # Redirigir al home si es consejero
+    
+    # Obtener el alumno vinculado al usuario
+    alumno = usuario.alumno
+    
+    # Buscar la última matrícula del alumno
+    matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()
 
-    # Busca la última matrícula del alumno
-    matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()  
-
+    # Renderizar el estado de la matrícula
     return render(request, 'estado.html', {'matricula': matricula})
 
 def aprobar_matricula(request, matricula_id):
