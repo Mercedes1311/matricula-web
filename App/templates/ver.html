@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="margin-left: 260px;">
+    <h1>Evaluacion de solicitud</h1>
+
+    <div>
+        <h3>Datos del Alumno</h3>
+        <p><strong>Código:</strong> {{ matricula.alumno.codigo }}</p>
+        <p><strong>Nombre Completo:</strong> {{ matricula.alumno.nombres }} {{ matricula.alumno.apellido_paterno }} {{ matricula.alumno.apellido_materno }}</p>
+        <p><strong>Plan:</strong> {{ matricula.plan }}</p>
+        <p><strong>Fecha de Matrícula:</strong> {{ matricula.fecha_matricula }}</p>
+    </div>
+
+    <div>
+        <h3>Cursos Matriculados</h3>
+        {% if cursos %}
+        <table class="tabla-canasta">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Turno</th>
+                    <th>Sección</th>
+                    <th>Asignaturas</th>
+                    <th>Créditos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for curso in cursos %}
+                <tr>
+                    <td>{{ curso.codigo }}</td>
+                    <td>{{ curso.turno }}</td>
+                    <td>{{ curso.seccion }}</td>
+                    <td>{{ curso.nombre_curso }}</td>
+                    <td>{{ curso.creditos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No hay cursos matriculados.</p>
+        {% endif %}
+    </div>
+
+    <!-- Botón para aprobar la matrícula -->
+    <div style="margin-top: 20px;">
+        {% if matricula.estado == 'pendiente' %}
+            <button id="aprobar-btn" class="btn btn-success">Aprobar</button>
+
+            <!-- Formulario para la aprobación -->
+            <div id="aprobacion-form" style="display:none; margin-top:20px;">                
+                <form action="{% url 'aprobar_matricula' matricula.id_matricula %}" method="POST" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <h3>Descripción de la aprobación</h3>
+                    <textarea name="mensaje_aprobacion" rows="4" cols="50" placeholder="Escribe la razón de la aprobación..."></textarea>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
+        {% elif matricula.estado == 'aprobado' %}
+        <p>La matrícula ha sido aprobada.</p>
+        {% endif %}
+    </div>
+
+    <!-- Botón para rechazar la matrícula -->
+    <div style="margin-top: 20px;">
+        {% if matricula.estado == 'pendiente' %}
+            <!-- Botón de rechazar que abre el formulario -->
+            <button id="rechazar-btn" class="btn btn-danger">Rechazar</button>
+    
+            <!-- Formulario para el rechazo -->
+            <div id="rechazo-form" style="display:none; margin-top:20px;">
+                <form action="{% url 'rechazar_matricula' matricula.id_matricula %}" method="POST">
+                    {% csrf_token %}
+                    <div>
+                        <h3>Descripción del rechazo</h3>
+                        <textarea name="mensaje_rechazo" rows="4" cols="50" placeholder="Escribe la razón del rechazo..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
+        {% elif matricula.estado == 'rechazado' %}
+            <p>La matrícula ha sido rechazada.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    document.getElementById('rechazar-btn').addEventListener('click', function() {
+        var rechazoForm = document.getElementById('rechazo-form');
+        rechazoForm.style.display = rechazoForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('aprobar-btn').addEventListener('click', function() {
+        var aprobacionForm = document.getElementById('aprobacion-form');
+        aprobacionForm.style.display = aprobacionForm.style.display === 'none' ? 'block' : 'none';
+    });
+</script>
+{% endblock %}

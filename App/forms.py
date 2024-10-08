@@ -17,7 +17,7 @@ class RegistroForm(UserCreationForm):
         if not Alumno.objects.filter(codigo=codigo).exists():
             raise forms.ValidationError("Este código de alumno no existe. Por favor verifique.")
         return codigo
-    
+
 class LoginForm(AuthenticationForm):
     username = forms.CharField(label='Usuario', max_length=10, widget=forms.TextInput(attrs={'class': 'form-control'}))
     password = forms.CharField(label="Contraseña", widget=forms.PasswordInput(attrs={'class': 'form-control'}))
