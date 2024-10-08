@@ -45,10 +45,17 @@
     <!-- Botón para aprobar la matrícula -->
     <div style="margin-top: 20px;">
         {% if matricula.estado == 'pendiente' %}
-        <form action="{% url 'aprobar_matricula' matricula.id_matricula %}" method="POST">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success">Aprobar</button>
-        </form>
+            <button id="aprobar-btn" class="btn btn-success">Aprobar</button>
+
+            <!-- Formulario para la aprobación -->
+            <div id="aprobacion-form" style="display:none; margin-top:20px;">                
+                <form action="{% url 'aprobar_matricula' matricula.id_matricula %}" method="POST" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <h3>Descripción de la aprobación</h3>
+                    <textarea name="mensaje_aprobacion" rows="4" cols="50" placeholder="Escribe la razón de la aprobación..."></textarea>
+                    <button type="submit" class="btn btn-primary">Enviar</button>
+                </form>
+            </div>
         {% elif matricula.estado == 'aprobado' %}
         <p>La matrícula ha sido aprobada.</p>
         {% endif %}
@@ -81,6 +88,11 @@
     document.getElementById('rechazar-btn').addEventListener('click', function() {
         var rechazoForm = document.getElementById('rechazo-form');
         rechazoForm.style.display = rechazoForm.style.display === 'none' ? 'block' : 'none';
+    });
+
+    document.getElementById('aprobar-btn').addEventListener('click', function() {
+        var aprobacionForm = document.getElementById('aprobacion-form');
+        aprobacionForm.style.display = aprobacionForm.style.display === 'none' ? 'block' : 'none';
     });
 </script>
 {% endblock %}
