@@ -3,7 +3,13 @@
 {% block content %}
 <main class="home">
     <header>
-        <h1>.: BIENVENIDO {{ request.user.alumno|upper }} A LA NUEVA INTRANET - UNFV</h1>
+        <h1>.: BIENVENIDO 
+            {% if request.user.alumno %}
+                {{ request.user.alumno|upper }}
+            {% else %}
+                {{ request.user.first_name|upper }} {{ request.user.last_name|upper }}
+            {% endif %} 
+            A LA NUEVA INTRANET - UNFV</h1>
     </header>
     <section class="content">
         <div class="container_v_m">

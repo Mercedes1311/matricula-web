@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div style="margin-left: 260px;" class="Datos_Matricula">
+    <h1>Constancia de Matrícula {% now "Y" %}</h1>
+
+    <div class="constancia-encabezado"> 
+        <div>
+            <p><strong>Escuela:</strong> {{ matricula.alumno.escuela }}</p>
+            <p><strong>Especialidad:</strong> {{ matricula.alumno.escuela }}</p>
+            <p><strong>Alumno:</strong> {{ matricula.alumno|upper }}</p>
+            <p><strong>Fecha:</strong> {{ matricula.fecha_matricula|date:"d/m/Y" }}</p>
+        </div>
+        <div>
+            <p><strong>Plan:</strong> {{ matricula.alumno.plan }}</p>
+            <p><strong>Nivel:</strong> {{ matricula.alumno.anio }}</p>
+            <p><strong>Cod Alumno:</strong> {{ matricula.alumno.codigo }}</p>
+        </div>
+    </div>
+
+    <div>
+        {% if cursos %}
+        <div>
+            <table class="tabla-canasta" style="margin-top: 0px;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Per</th>
+                        <th>Código</th>
+                        <th>T</th>
+                        <th>S</th>
+                        <th>Asignaturas</th>
+                        <th>Créditos</th>
+                        <th>Nivel</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curso in cursos %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{% now "Y" %} - {{ curso.semestre}}</td>
+                        <td>{{ curso.codigo }}</td>
+                        <td>{{ curso.turno }}</td>
+                        <td>{{ curso.seccion }}</td>
+                        <td>{{ curso.nombre_curso }}</td>
+                        <td>{{ curso.creditos }}</td>
+                        <td>{{ curso.anio }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top: 20px;"><strong>Total de créditos: </strong>{{ total_creditos }}</p>
+        <br />
+        <form method="POST" action="{% url 'enviar_pdf' matricula.id_matricula %}">
+            {% csrf_token %}
+            <input type="email" name="correo" placeholder="Ingresa tu correo" required>
+            <button type="submit" class="btn btn-primary" style="border: none;">Enviar a Correo</button>
+        </form>
+        <a href="{% url 'descargar_pdf' matricula.id_matricula %}" class="btn btn-primary">Descargar PDF</a>
+
+        {% else %}
+        <p>No hay cursos matriculados.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

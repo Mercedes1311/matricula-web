@@ -1,19 +1,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div style="margin-left: 260px;">
-    <h1>Estado de matrícula</h1>
-    {% if matricula %}
-        <p><strong>Solicitud de matrícula:</strong> <input type="text" value="{{ matricula.estado }}" readonly></p>
+<div class="home">
+    <div class="estado" >
+        <h1>Estado de matrícula</h1>
+    </div>
+    <div class="estado-content">
+        {% if matricula %}
+            <div class="estado-detalle">
+                <h3>Solicitud de matrícula:</h3>
+                <br>
+                <button class="estado-boton" disabled>{{ matricula.estado }}</button>
+            </div>
 
-        {% if matricula.estado == 'rechazado' %}
-            <div>
-                <h3>Motivo del rechazo:</h3>
-                <p>{{ matricula.mensaje_rechazo }}</p>
+            <br>
+
+            {% if matricula.estado == 'rechazado' %}
+                <div class="estado-mensaje">
+                    <h3>Motivo del rechazo:</h3>
+                    <br>
+                    <div class="mensaje alerta-rechazo">
+                        <p>{{ matricula.mensaje_rechazo }}</p>
+                    </div>
+                </div>
+            {% elif matricula.estado == 'aprobado' %}
+                <div class="estado-mensaje">
+                    <h3>Motivo de la aprobación:</h3>
+                    <br>
+                    <div class="mensaje alerta-aprobado">
+                        <p>{{ matricula.mensaje_aprobacion }}</p>
+                    </div>
+                </div>
+            {% endif %}
+            <br />
+            <a href="{% url 'detalles_matricula' matricula.id_matricula %}" class="btn-filter">Ver detalles de matrícula</a>
+        {% else %}
+            <div class="estado-vacio">
+                <p>No tienes ninguna matrícula registrada.</p>
             </div>
         {% endif %}
-    {% else %}
-        <p>No tienes ninguna matrícula registrada.</p>
-    {% endif %}
+    </div>
 </div>
 {% endblock %}

@@ -7,7 +7,12 @@ from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricu
 from django.utils import timezone
 from .decorators import consejero_required
 from django.db.models import Max
-from django.http import HttpResponseForbidden
+from django.http import HttpResponse
+from django.template import Context
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 @login_required
 def home(request):
@@ -61,12 +66,16 @@ def signout(request):
 @login_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username) 
+    if usuario.rol == 'consejero':
+        return redirect('home') 
     alumno = usuario.alumno
     return render(request, 'perfil.html', {'usuario': usuario, 'alumno': alumno})
 
 @login_required
 def matricula(request):
     usuario = request.user
+    if usuario.rol == 'consejero':
+        return redirect('home') 
     alumno = get_object_or_404(Usuario, username=usuario.username).alumno
 
     form_filtrar = FiltrarCursosForm()
@@ -126,7 +135,6 @@ def matricula(request):
                 else:
                     messages.error(request, "No puedes añadir más cursos. El límite es 22 créditos.")
 
-            return redirect('matricula')
 
         elif 'eliminar_curso_id' in request.POST:
             curso_id = request.POST.get('eliminar_curso_id')
@@ -134,7 +142,6 @@ def matricula(request):
                 cursos_seleccionados.remove(int(curso_id))
                 request.session['cursos_seleccionados'] = cursos_seleccionados
 
-            return redirect('matricula')
 
     cursos_en_canasta = Curso.objects.filter(id__in=cursos_seleccionados)
     creditos_actuales = sum(curso.creditos for curso in cursos_en_canasta)
@@ -151,6 +158,8 @@ def matricula(request):
 @login_required
 def historial(request):
     usuario = request.user
+    if usuario.rol == 'consejero':
+        return redirect('home')
     alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
     matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
 
@@ -164,7 +173,6 @@ def historial(request):
 
 @consejero_required
 def solicitud(request):
-    # Obtener la última matrícula de cada alumno
     matriculas = Matricula.objects.filter(
         id_matricula__in=Matricula.objects.values('alumno').annotate(ultima_matricula=Max('id_matricula')).values('ultima_matricula')
     ).select_related('alumno').order_by('-fecha_matricula')
@@ -188,23 +196,43 @@ def ver_matricula(request, id_matricula):
     
 # Función para renderizar el estado de matrícula
 def estado_matricula(request):
+
+    usuario = request.user
     
-    alumno = request.user.alumno  # Suponiendo que el usuario está autenticado y vinculado a un alumno
+    # Verificar si el usuario tiene el rol de consejero
+    if usuario.rol == 'consejero':
+        return redirect('home')  # Redirigir al home si es consejero
+    
+    # Obtener el alumno vinculado al usuario
+    alumno = usuario.alumno
+    
+    # Buscar la última matrícula del alumno
+    matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()
 
-    # Busca la última matrícula del alumno
-    matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()  
-
+    # Renderizar el estado de la matrícula
     return render(request, 'estado.html', {'matricula': matricula})
 
 def aprobar_matricula(request, matricula_id):
-
     # Obtener la matrícula por su ID
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
-    # Cambiar el estado de la matrícula a 'aprobado'
-    if matricula.estado == 'pendiente':
-        matricula.estado = 'aprobado'
-        matricula.save()
+    if request.method == 'POST':
+        # Obtener el mensaje de aprobación del formulario
+        mensaje_aprobacion = request.POST.get('mensaje_aprobacion', '').strip()
+
+        # Verifica que haya un mensaje de aprobación antes de aprobar
+        if mensaje_aprobacion:
+            matricula.estado = 'aprobado'
+            matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
+            
+            # Guardar los cambios en la matrícula
+            matricula.save()
+        else:
+            # Si no hay mensaje, puedes agregar una lógica para manejar el error
+            return render(request, 'ver.html', {
+                'matricula': matricula,
+                'error': 'Debes proporcionar un motivo de aprobación.'
+            })
 
     # Redirigir a la misma página o a una página de confirmación
     return redirect('ver_matricula', id_matricula=matricula.id_matricula)
@@ -228,3 +256,63 @@ def rechazar_matricula(request, matricula_id):
             })
 
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
+
+def detalles_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+    cursos = matricula.cursos.all() 
+    total_creditos = sum(curso.creditos for curso in cursos)
+    return render(request, 'detalles.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
+
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Constancia de matrícula 2024.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF')
+    return response
+
+def constancia_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+    cursos = matricula.cursos.all() 
+
+    context = {
+        'matricula': matricula,
+        'cursos': cursos,
+        'total_creditos': sum(course.creditos for course in cursos), 
+    }
+
+    return render_to_pdf('imprimir.html', context)
+
+def ver_constancia_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+    cursos = matricula.cursos.all() 
+    total_creditos = sum(curso.creditos for curso in cursos)
+
+    return render(request, 'imprimir.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
+
+def send_pdf_email(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+
+    context = {
+        'matricula': matricula,
+        'cursos': matricula.cursos.all(),
+        'total_creditos': sum(course.creditos for course in matricula.cursos.all()),
+    }
+    
+    pdf = render_to_pdf('imprimir.html', context)  
+
+    email = EmailMessage(
+        subject='Constancia de Matrícula',
+        body='Adjunto la constancia de matrícula.',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[request.POST['correo']], 
+    )
+
+    email.attach('Constancia de matrícula 2024.pdf', pdf.content, 'application/pdf')
+    email.send()
+
+    return HttpResponse('Correo enviado exitosamente.')

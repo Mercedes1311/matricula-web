@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Constancia de Matrícula</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .constancia-datos {
+            display: flex;
+            gap: 200px;
+        }
+        .Datos_Matricula h1 {
+            background-color: #e9ecef;
+            padding-top: 20px;
+            padding-bottom: 10px;
+            border-left: 4px solid #ffc107;
+            text-align: center;
+            font-size: 20px;
+        }
+        .tabla-canasta {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .tabla-canasta th, .tabla-canasta td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .tabla-canasta th {
+            background-color: #ffc107;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="Datos_Matricula">
+        <h1>CONSTANCIA DE MATRÍCULA {% now "Y" %}</h1>
+
+        <div class="constancia-datos"> 
+            <div>
+                <p>Escuela: {{ matricula.alumno.escuela }}</p>
+                <p>Especialidad: {{ matricula.alumno.escuela }}</p>
+                <p>Alumno: <strong>{{ matricula.alumno|upper }}</strong></p>
+                <p>Fecha: {{ matricula.fecha_matricula|date:"d/m/Y" }}</p>
+            </div>
+            <div>
+                <p>Plan: {{ matricula.alumno.plan }}</p>
+                <p>Nivel: {{ matricula.alumno.anio }}</p>
+                <p>Cod Alumno: {{ matricula.alumno.codigo }}</p>
+            </div>
+        </div>
+
+        <div>
+            {% if cursos %}
+            <div>
+                <table class="tabla-canasta">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;"></th>
+                            <th style="width: 10%; text-align: center">Per</th>
+                            <th style="width: 10%; text-align: center">Código</th>
+                            <th style="width: 5%; text-align: center">T</th>
+                            <th style="width: 5%; text-align: center">S</th>
+                            <th style="width: 45%;">Asignaturas</th>
+                            <th style="width: 10%; text-align: center">Créditos</th>
+                            <th style="width: 10%; text-align: center">Nivel</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for curso in cursos %}
+                        <tr>
+                            <td style="text-align: center;">{{ forloop.counter }}</td>
+                            <td style="text-align: center;">{% now "Y" %} - {{ curso.semestre }}</td>
+                            <td style="text-align: center;">{{ curso.codigo }}</td>
+                            <td style="text-align: center;">{{ curso.turno }}</td>
+                            <td style="text-align: center;">{{ curso.seccion }}</td>
+                            <td>{{ curso.nombre_curso }}</td>
+                            <td style="text-align: center;">{{ curso.creditos }}</td>
+                            <td style="text-align: center;">{{ curso.anio }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <p style="margin-top: 20px;"><strong>Total de créditos: </strong>{{ total_creditos }}</p>
+            {% else %}
+            <p>No hay cursos matriculados.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

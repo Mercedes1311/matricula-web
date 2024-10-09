@@ -91,9 +91,10 @@ class Matricula(models.Model):
     cursos = models.ManyToManyField(Curso)
     boucher = models.ForeignKey(Boucher, on_delete=models.CASCADE)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    fecha_matricula = models.DateField(default=timezone.now)
+    fecha_matricula = models.DateTimeField(default=timezone.now)
     estado = models.CharField(max_length=20, default='pendiente')
     mensaje_rechazo = models.TextField(blank=True, null=True)
+    mensaje_aprobacion = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Matricula {self.id_matricula} - Alumno: {self.alumno} - Estado: {self.estado}"
