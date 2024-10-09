@@ -130,7 +130,6 @@ def matricula(request):
                 else:
                     messages.error(request, "No puedes añadir más cursos. El límite es 22 créditos.")
 
-            return redirect('matricula')
 
         elif 'eliminar_curso_id' in request.POST:
             curso_id = request.POST.get('eliminar_curso_id')
@@ -138,7 +137,6 @@ def matricula(request):
                 cursos_seleccionados.remove(int(curso_id))
                 request.session['cursos_seleccionados'] = cursos_seleccionados
 
-            return redirect('matricula')
 
     cursos_en_canasta = Curso.objects.filter(id__in=cursos_seleccionados)
     creditos_actuales = sum(curso.creditos for curso in cursos_en_canasta)
@@ -253,3 +251,10 @@ def rechazar_matricula(request, matricula_id):
             })
 
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
+
+def detalles_matricula(request, id_matricula):
+    matricula = get_object_or_404(Matricula, id_matricula=id_matricula)
+    cursos = matricula.cursos.all() 
+    total_creditos = sum(curso.creditos for curso in cursos)
+    return render(request, 'detalles.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
+

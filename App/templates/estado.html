@@ -10,9 +10,7 @@
             <div class="estado-detalle">
                 <h3>Solicitud de matrícula:</h3>
                 <br>
-                <!-- <label><strong>Solicitud de matrícula:</strong></label> -->
                 <button class="estado-boton" disabled>{{ matricula.estado }}</button>
-                <!-- <input type="text" value="{{ matricula.estado }}" readonly> -->
             </div>
 
             <br>
@@ -34,6 +32,8 @@
                     </div>
                 </div>
             {% endif %}
+            <br />
+            <a href="{% url 'detalles_matricula' matricula.id_matricula %}" class="btn-filter">Ver detalles de matrícula</a>
         {% else %}
             <div class="estado-vacio">
                 <p>No tienes ninguna matrícula registrada.</p>
