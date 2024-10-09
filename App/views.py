@@ -7,7 +7,12 @@ from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricu
 from django.utils import timezone
 from .decorators import consejero_required
 from django.db.models import Max
-from django.http import HttpResponseForbidden
+from django.http import HttpResponse
+from django.template import Context
+from django.template.loader import get_template
+from xhtml2pdf import pisa
+from django.core.mail import EmailMessage
+from django.conf import settings
 
 @login_required
 def home(request):
@@ -252,9 +257,62 @@ def rechazar_matricula(request, matricula_id):
 
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
-def detalles_matricula(request, id_matricula):
-    matricula = get_object_or_404(Matricula, id_matricula=id_matricula)
+def detalles_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
     total_creditos = sum(curso.creditos for curso in cursos)
     return render(request, 'detalles.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
 
+def render_to_pdf(template_src, context_dict={}):
+    template = get_template(template_src)
+    html = template.render(context_dict)
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="Constancia de matrícula 2024.pdf"'
+    
+    pisa_status = pisa.CreatePDF(html, dest=response)
+    
+    if pisa_status.err:
+        return HttpResponse('Error al generar el PDF')
+    return response
+
+def constancia_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+    cursos = matricula.cursos.all() 
+
+    context = {
+        'matricula': matricula,
+        'cursos': cursos,
+        'total_creditos': sum(course.creditos for course in cursos), 
+    }
+
+    return render_to_pdf('imprimir.html', context)
+
+def ver_constancia_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+    cursos = matricula.cursos.all() 
+    total_creditos = sum(curso.creditos for curso in cursos)
+
+    return render(request, 'imprimir.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
+
+def send_pdf_email(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
+
+    context = {
+        'matricula': matricula,
+        'cursos': matricula.cursos.all(),
+        'total_creditos': sum(course.creditos for course in matricula.cursos.all()),
+    }
+    
+    pdf = render_to_pdf('imprimir.html', context)  
+
+    email = EmailMessage(
+        subject='Constancia de Matrícula',
+        body='Adjunto la constancia de matrícula.',
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        to=[request.POST['correo']], 
+    )
+
+    email.attach('Constancia de matrícula 2024.pdf', pdf.content, 'application/pdf')
+    email.send()
+
+    return HttpResponse('Correo enviado exitosamente.')

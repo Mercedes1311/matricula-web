@@ -51,6 +51,14 @@
             </table>
         </div>
         <p style="margin-top: 20px;"><strong>Total de créditos: </strong>{{ total_creditos }}</p>
+        <br />
+        <form method="POST" action="{% url 'enviar_pdf' matricula.id_matricula %}">
+            {% csrf_token %}
+            <input type="email" name="correo" placeholder="Ingresa tu correo" required>
+            <button type="submit" class="btn btn-primary" style="border: none;">Enviar a Correo</button>
+        </form>
+        <a href="{% url 'descargar_pdf' matricula.id_matricula %}" class="btn btn-primary">Descargar PDF</a>
+
         {% else %}
         <p>No hay cursos matriculados.</p>
         {% endif %}
