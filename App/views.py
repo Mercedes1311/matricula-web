@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
+from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
 from .decorators import consejero_required
@@ -62,6 +62,31 @@ def signin(request):
 def signout(request):
     logout(request)
     return redirect('signin')
+
+def recuperar_contrasena(request):
+    if request.method == 'POST':
+        form = RecuperarContrasenaForm(request.POST)
+        if form.is_valid():
+            codigo = form.cleaned_data['codigo']
+            dni = form.cleaned_data['dni']
+            nueva_contrasena = form.cleaned_data['nueva_contrasena']
+
+            try:
+                alumno = Alumno.objects.get(codigo=codigo, dni=dni)
+                usuario = alumno.usuario 
+
+                usuario.set_password(nueva_contrasena)
+                usuario.save()
+
+                messages.success(request, 'La contraseña ha sido cambiada exitosamente.')
+                return redirect('signin') 
+            except Alumno.DoesNotExist:
+                messages.error(request, 'Los datos ingresados no coinciden.')
+
+    else:
+        form = RecuperarContrasenaForm()
+
+    return render(request, 'recuperar_contrasena.html', {'form': form})
 
 @login_required
 def perfil(request, username):

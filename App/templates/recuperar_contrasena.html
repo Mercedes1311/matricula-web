@@ -21,7 +21,7 @@
 
         .form-container {
             width: 400px;
-            padding: 20px 30px 20px 30px;
+            padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             background-color: white;
@@ -57,40 +57,35 @@
             margin-top: 15px;
             color: #666;
         }
-
-        .login-link {
-            display: block;
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-        }
+        
     </style>
 </head>
 <body>
     <main class="container">
         <div class="form-container">
+            <h2>Recuperar Contraseña</h2>
             <form method="post">
                 {% csrf_token %}
-                <h1>Registrarse</h2>
-
                 <div class="form-group mb-3">
                     {{ form.codigo.label_tag }}
                     {{ form.codigo }}
                 </div>
             
                 <div class="form-group mb-3">
-                    {{ form.password1.label_tag }}
-                    {{ form.password1 }} 
+                    {{ form.dni.label_tag }}
+                    {{ form.dni }} 
                 </div>
 
                 <div class="form-group mb-3">
-                {{ form.password2.label_tag }}
-                {{ form.password2 }}
+                    {{ form.nueva_contrasena.label_tag }}
+                    {{ form.nueva_contrasena }}
                 </div>
-                <button type="submit" class="btn btn-login">Registrarse</button>
+                <div class="form-group mb-3">
+                    {{ form.confirmar_contrasena.label_tag }}
+                    {{ form.confirmar_contrasena }}
+                </div>
+                <button type="submit" class="btn btn-login">Cambiar Contraseña</button>
             </form>
-            <a class="login-link" href="{% url 'signin' %}">¿Ya tienes cuenta? Inicia sesión</a>
-            <a class="register-link" href="{% url 'recuperar_contrasena' %}">¿Olvidaste tu contraseña?</a>
         </div>
     </main>
 </body>
