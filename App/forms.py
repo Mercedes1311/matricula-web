@@ -26,5 +26,7 @@ class FiltrarCursosForm(forms.Form):
     semestre = forms.ChoiceField(label="Semestre:", choices=[('1', 'Semestre 1'), ('2', 'Semestre 2')])
 
 class MatriculaForm(forms.Form):
-    numero_recibo = forms.CharField(label='Número de Recibo: ', max_length=20, required=True)
-    monto_recibo = forms.DecimalField(label='Monto del Recibo: ', max_digits=10, decimal_places=2, required=True)
+    numero_recibo1 = forms.CharField(label='Número del Primer Recibo: ', max_length=20, required=True)
+    monto_recibo1 = forms.DecimalField(label='Monto del Primer Recibo: ', max_digits=10, decimal_places=2, required=True)
+    numero_recibo2 = forms.CharField(label='Número del Segundo Recibo: ', max_length=20, required=True)
+    monto_recibo2 = forms.DecimalField(label='Monto del Segundo Recibo: ', max_digits=10, decimal_places=2, required=True)

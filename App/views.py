@@ -105,21 +105,26 @@ def matricula(request):
         elif 'guardar_matricula' in request.POST:
             form_matricula = MatriculaForm(request.POST)
             if form_matricula.is_valid():
-                numero_recibo = form_matricula.cleaned_data['numero_recibo']
-                monto_recibo = form_matricula.cleaned_data['monto_recibo']
-                
-                boucher = Boucher.objects.create(
+                boucher1 = Boucher.objects.create(
                     alumno=alumno,
-                    numero_boucher=numero_recibo,
-                    monto=monto_recibo
+                    numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
+                    monto=form_matricula.cleaned_data['monto_recibo1']
                 )
+
+                boucher2 = Boucher.objects.create(
+                    alumno=alumno,
+                    numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
+                    monto=form_matricula.cleaned_data['monto_recibo2']
+                )
+
                 matricula = Matricula.objects.create(
                     alumno=alumno,
-                    boucher=boucher,
                     plan=alumno.plan,
                     fecha_matricula=timezone.now()
                 )
                 matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
+                matricula.boucher.add(boucher1, boucher2)  
+
                 request.session['cursos_seleccionados'] = []
                 messages.success(request, "Matrícula guardada con éxito.")
 
@@ -129,11 +134,11 @@ def matricula(request):
                 curso = get_object_or_404(Curso, id=int(curso_id))
                 creditos_actuales = sum(curso.creditos for curso in Curso.objects.filter(id__in=cursos_seleccionados))
 
-                if creditos_actuales + curso.creditos <= 22:
+                if creditos_actuales + curso.creditos <=44:
                     cursos_seleccionados.append(int(curso_id))
                     request.session['cursos_seleccionados'] = cursos_seleccionados
                 else:
-                    messages.error(request, "No puedes añadir más cursos. El límite es 22 créditos.")
+                    messages.error(request, "No puedes añadir más cursos. El límite es 44 créditos.")
 
 
         elif 'eliminar_curso_id' in request.POST:
@@ -156,20 +161,27 @@ def matricula(request):
     })
 
 @login_required
+@login_required
 def historial(request):
     usuario = request.user
+
     if usuario.rol == 'consejero':
         return redirect('home')
-    alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
-    matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
+
+    try:
+        alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
+        matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
+    except Matricula.DoesNotExist:
+        matricula = None
 
     context = {
         'alumno': alumno,
         'matricula': matricula,
-        'cursos': matricula.cursos.all() if matricula else [],  
-        'boucher': matricula.boucher if matricula else None
+        'cursos': matricula.cursos.all() if matricula else [],
+        'bouchers': matricula.boucher.all() if matricula else []
     }
     return render(request, 'historial.html', context)
+
 
 @consejero_required
 def solicitud(request):
