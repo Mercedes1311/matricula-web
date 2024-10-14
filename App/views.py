@@ -13,6 +13,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.db import transaction
+
 
 @login_required
 def home(request):
@@ -155,15 +157,18 @@ def matricula(request):
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
-            if curso_id and int(curso_id) not in cursos_seleccionados:
-                curso = get_object_or_404(Curso, id=int(curso_id))
+            curso = get_object_or_404(Curso, id=int(curso_id))
+                # Verificar si el curso aún tiene cupos disponibles
+            if curso.cupos_disponibles > 0:
                 creditos_actuales = sum(curso.creditos for curso in Curso.objects.filter(id__in=cursos_seleccionados))
 
-                if creditos_actuales + curso.creditos <=44:
+                if creditos_actuales + curso.creditos <= 44:
                     cursos_seleccionados.append(int(curso_id))
                     request.session['cursos_seleccionados'] = cursos_seleccionados
                 else:
                     messages.error(request, "No puedes añadir más cursos. El límite es 44 créditos.")
+            else:
+                messages.error(request, "Este curso ya no tiene cupos disponibles.")
 
 
         elif 'eliminar_curso_id' in request.POST:
@@ -249,6 +254,7 @@ def estado_matricula(request):
     # Renderizar el estado de la matrícula
     return render(request, 'estado.html', {'matricula': matricula})
 
+
 def aprobar_matricula(request, matricula_id):
     # Obtener la matrícula por su ID
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
@@ -259,11 +265,29 @@ def aprobar_matricula(request, matricula_id):
 
         # Verifica que haya un mensaje de aprobación antes de aprobar
         if mensaje_aprobacion:
-            matricula.estado = 'aprobado'
-            matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
-            
-            # Guardar los cambios en la matrícula
-            matricula.save()
+            # Usamos una transacción atómica para garantizar que todas las operaciones sean consistentes
+            try:
+                with transaction.atomic():
+                    matricula.estado = 'aprobado'
+                    matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
+                    matricula.save()
+
+                    # Descontar cupos de los cursos seleccionados
+                    for curso in matricula.cursos.all():
+                        if curso.cupos_disponibles > 0:
+                            curso.cupos_disponibles -= 1
+                            curso.save()
+                        else:
+                            raise ValueError(f"El curso {curso.nombre_curso} ya no tiene cupos disponibles.")
+                            
+                    messages.success(request, "Matrícula aprobada exitosamente.")
+            except ValueError as e:
+                # Si ocurre un error (por ejemplo, cupos insuficientes), mostramos el mensaje de error
+                messages.error(request, str(e))
+                return render(request, 'ver.html', {
+                    'matricula': matricula,
+                    'error': str(e)
+                })
         else:
             # Si no hay mensaje, puedes agregar una lógica para manejar el error
             return render(request, 'ver.html', {
@@ -273,6 +297,9 @@ def aprobar_matricula(request, matricula_id):
 
     # Redirigir a la misma página o a una página de confirmación
     return redirect('ver_matricula', id_matricula=matricula.id_matricula)
+
+
+
 
 def rechazar_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)

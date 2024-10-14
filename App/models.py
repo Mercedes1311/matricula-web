@@ -64,6 +64,8 @@ class Curso(models.Model):
         blank=True, 
     )
     anio = models.IntegerField(default=1)
+    cupos_disponibles = models.IntegerField(default=30)  # Agregar este campo para cupos disponibles
+
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_curso} ({self.turno}{self.seccion})"
