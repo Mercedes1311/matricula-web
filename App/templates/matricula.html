@@ -103,9 +103,10 @@
       <h3>Datos del Recibo</h3>
       <form method="POST">
         {% csrf_token %}
-        {{ form_matricula.numero_recibo.label }} {{ form_matricula.numero_recibo }}
-        {{ form_matricula.monto_recibo.label }} {{ form_matricula.monto_recibo }}
-        {{ form_matricula.fecha_recibo.label }} {{ form_matricula.fecha_recibo }}
+        {{ form_matricula.numero_recibo1.label }} {{ form_matricula.numero_recibo1 }}
+        {{ form_matricula.monto_recibo1.label }} {{ form_matricula.monto_recibo1 }}
+        {{ form_matricula.numero_recibo2.label }} {{ form_matricula.numero_recibo2 }}
+        {{ form_matricula.monto_recibo2.label }} {{ form_matricula.monto_recibo2 }}
         <button type="submit" name="guardar_matricula" class="btn-filter">Guardar Matrícula</button>
       </form>
     </div>

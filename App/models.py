@@ -64,6 +64,8 @@ class Curso(models.Model):
         blank=True, 
     )
     anio = models.IntegerField(default=1)
+    cupos_disponibles = models.IntegerField(default=30)  # Agregar este campo para cupos disponibles
+
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_curso} ({self.turno}{self.seccion})"
@@ -89,7 +91,7 @@ class Matricula(models.Model):
     id_matricula = models.AutoField(primary_key=True)
     alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
     cursos = models.ManyToManyField(Curso)
-    boucher = models.ForeignKey(Boucher, on_delete=models.CASCADE)
+    boucher = models.ManyToManyField(Boucher)
     plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
     fecha_matricula = models.DateTimeField(default=timezone.now)
     estado = models.CharField(max_length=20, default='pendiente')

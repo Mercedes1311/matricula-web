@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm
+from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
 from .decorators import consejero_required
@@ -13,6 +13,8 @@ from django.template.loader import get_template
 from xhtml2pdf import pisa
 from django.core.mail import EmailMessage
 from django.conf import settings
+from django.db import transaction
+
 
 @login_required
 def home(request):
@@ -63,6 +65,31 @@ def signout(request):
     logout(request)
     return redirect('signin')
 
+def recuperar_contrasena(request):
+    if request.method == 'POST':
+        form = RecuperarContrasenaForm(request.POST)
+        if form.is_valid():
+            codigo = form.cleaned_data['codigo']
+            dni = form.cleaned_data['dni']
+            nueva_contrasena = form.cleaned_data['nueva_contrasena']
+
+            try:
+                alumno = Alumno.objects.get(codigo=codigo, dni=dni)
+                usuario = alumno.usuario 
+
+                usuario.set_password(nueva_contrasena)
+                usuario.save()
+
+                messages.success(request, 'La contraseña ha sido cambiada exitosamente.')
+                return redirect('signin') 
+            except Alumno.DoesNotExist:
+                messages.error(request, 'Los datos ingresados no coinciden.')
+
+    else:
+        form = RecuperarContrasenaForm()
+
+    return render(request, 'recuperar_contrasena.html', {'form': form})
+
 @login_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username) 
@@ -105,35 +132,43 @@ def matricula(request):
         elif 'guardar_matricula' in request.POST:
             form_matricula = MatriculaForm(request.POST)
             if form_matricula.is_valid():
-                numero_recibo = form_matricula.cleaned_data['numero_recibo']
-                monto_recibo = form_matricula.cleaned_data['monto_recibo']
-                
-                boucher = Boucher.objects.create(
+                boucher1 = Boucher.objects.create(
                     alumno=alumno,
-                    numero_boucher=numero_recibo,
-                    monto=monto_recibo
+                    numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
+                    monto=form_matricula.cleaned_data['monto_recibo1']
                 )
+
+                boucher2 = Boucher.objects.create(
+                    alumno=alumno,
+                    numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
+                    monto=form_matricula.cleaned_data['monto_recibo2']
+                )
+
                 matricula = Matricula.objects.create(
                     alumno=alumno,
-                    boucher=boucher,
                     plan=alumno.plan,
                     fecha_matricula=timezone.now()
                 )
                 matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
+                matricula.boucher.add(boucher1, boucher2)  
+
                 request.session['cursos_seleccionados'] = []
                 messages.success(request, "Matrícula guardada con éxito.")
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
-            if curso_id and int(curso_id) not in cursos_seleccionados:
-                curso = get_object_or_404(Curso, id=int(curso_id))
+            curso = get_object_or_404(Curso, id=int(curso_id))
+                # Verificar si el curso aún tiene cupos disponibles
+            if curso.cupos_disponibles > 0:
                 creditos_actuales = sum(curso.creditos for curso in Curso.objects.filter(id__in=cursos_seleccionados))
 
-                if creditos_actuales + curso.creditos <= 22:
+                if creditos_actuales + curso.creditos <= 44:
                     cursos_seleccionados.append(int(curso_id))
                     request.session['cursos_seleccionados'] = cursos_seleccionados
                 else:
-                    messages.error(request, "No puedes añadir más cursos. El límite es 22 créditos.")
+                    messages.error(request, "No puedes añadir más cursos. El límite es 44 créditos.")
+            else:
+                messages.error(request, "Este curso ya no tiene cupos disponibles.")
 
 
         elif 'eliminar_curso_id' in request.POST:
@@ -156,20 +191,27 @@ def matricula(request):
     })
 
 @login_required
+@login_required
 def historial(request):
     usuario = request.user
+
     if usuario.rol == 'consejero':
         return redirect('home')
-    alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
-    matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
+
+    try:
+        alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
+        matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
+    except Matricula.DoesNotExist:
+        matricula = None
 
     context = {
         'alumno': alumno,
         'matricula': matricula,
-        'cursos': matricula.cursos.all() if matricula else [],  
-        'boucher': matricula.boucher if matricula else None
+        'cursos': matricula.cursos.all() if matricula else [],
+        'bouchers': matricula.boucher.all() if matricula else []
     }
     return render(request, 'historial.html', context)
+
 
 @consejero_required
 def solicitud(request):
@@ -212,6 +254,7 @@ def estado_matricula(request):
     # Renderizar el estado de la matrícula
     return render(request, 'estado.html', {'matricula': matricula})
 
+
 def aprobar_matricula(request, matricula_id):
     # Obtener la matrícula por su ID
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
@@ -222,11 +265,29 @@ def aprobar_matricula(request, matricula_id):
 
         # Verifica que haya un mensaje de aprobación antes de aprobar
         if mensaje_aprobacion:
-            matricula.estado = 'aprobado'
-            matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
-            
-            # Guardar los cambios en la matrícula
-            matricula.save()
+            # Usamos una transacción atómica para garantizar que todas las operaciones sean consistentes
+            try:
+                with transaction.atomic():
+                    matricula.estado = 'aprobado'
+                    matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
+                    matricula.save()
+
+                    # Descontar cupos de los cursos seleccionados
+                    for curso in matricula.cursos.all():
+                        if curso.cupos_disponibles > 0:
+                            curso.cupos_disponibles -= 1
+                            curso.save()
+                        else:
+                            raise ValueError(f"El curso {curso.nombre_curso} ya no tiene cupos disponibles.")
+                            
+                    messages.success(request, "Matrícula aprobada exitosamente.")
+            except ValueError as e:
+                # Si ocurre un error (por ejemplo, cupos insuficientes), mostramos el mensaje de error
+                messages.error(request, str(e))
+                return render(request, 'ver.html', {
+                    'matricula': matricula,
+                    'error': str(e)
+                })
         else:
             # Si no hay mensaje, puedes agregar una lógica para manejar el error
             return render(request, 'ver.html', {
@@ -236,6 +297,9 @@ def aprobar_matricula(request, matricula_id):
 
     # Redirigir a la misma página o a una página de confirmación
     return redirect('ver_matricula', id_matricula=matricula.id_matricula)
+
+
+
 
 def rechazar_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
