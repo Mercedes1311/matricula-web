@@ -494,23 +494,47 @@
             margin-top: 20px;
         }
         .estado-boton {
-            background-color: #17a2b8; /* Color de fondo del botón */
-            color: white; /* Color del texto */
-            padding: 20px; /* Espaciado interno */
-            border: none; /* Sin borde */
-            border-radius: 5px; /* Bordes redondeados */
-            font-size: 16px; /* Tamaño de la fuente */
-            cursor: not-allowed; /* Cambia el cursor para mostrar que no es clicable */
+            background-color: #17a2b8; 
+            color: white; 
+            padding: 20px; 
+            border: none; 
+            border-radius: 5px; 
+            font-size: 16px; 
+            cursor: not-allowed; 
             text-align: center;
-            width: 100%; /* Ocupa todo el ancho disponible */
+            width: 100%; 
         }
 
         .estado-boton:disabled {
-            opacity: 0.7; /* Reduce un poco la opacidad del botón */
+            opacity: 0.7; 
         }     
         .constancia-encabezado {
             display: flex;
             gap: 100px;
+        }
+
+        .estado {
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            display: inline-block;
+            width: auto;  
+            box-sizing: border-box;  
+            margin: 0;  
+            border: none;
+        }
+
+        .aprobado {
+            background-color: #4CAF50; 
+        }
+
+        .rechazado {
+            background-color: #F44336; 
+        }
+
+        .pendiente {
+            background-color: #ffa807; 
         }
 
     </style>
@@ -556,8 +580,14 @@
                         </li>
                         <li class="nav-link">
                             <a href="{% url 'solicitud' %}">
-                                <i class="bi bi-book"></i>
+                                <i class="bi bi-file-earmark-text"></i>
                                 Solicitudes
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'inscripciones' %}">
+                                <i class="bi bi-book"></i>
+                                Inscripciones
                             </a>
                         </li>
                         <li class="nav-link">

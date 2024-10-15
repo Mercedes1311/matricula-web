@@ -227,13 +227,16 @@ def solicitud(request):
 
 @login_required
 @consejero_required
-def ver_matricula(request, id_matricula):
-    matricula = get_object_or_404(Matricula, id_matricula=id_matricula)
+def ver_matricula(request, matricula_id):
+    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all()  # Obtener los cursos de la matrícula
+    
+    from_inscripciones = request.GET.get('from_inscripciones', False)
 
     return render(request, 'ver.html', {
         'matricula': matricula,
         'cursos': cursos,
+        'from_inscripciones': from_inscripciones,
     })
     
 # Función para renderizar el estado de matrícula
@@ -296,7 +299,7 @@ def aprobar_matricula(request, matricula_id):
             })
 
     # Redirigir a la misma página o a una página de confirmación
-    return redirect('ver_matricula', id_matricula=matricula.id_matricula)
+    return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
 
 
@@ -380,3 +383,19 @@ def send_pdf_email(request, matricula_id):
     email.send()
 
     return HttpResponse('Correo enviado exitosamente.')
+
+@login_required
+@consejero_required
+def inscripciones(request):
+    # Filtrar las matrículas por estado
+    matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
+    matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
+    matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
+
+    context = {
+        'matriculas_aprobadas': matriculas_aprobadas,
+        'matriculas_rechazadas': matriculas_rechazadas,
+        'matriculas_pendientes': matriculas_pendientes,
+    }
+
+    return render(request, 'inscripcion.html', context)
