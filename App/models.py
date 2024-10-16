@@ -16,6 +16,13 @@ class Consejero(models.Model):
 
     def __str__(self):
         return f"{self.usuario.first_name} {self.usuario.last_name}"
+    
+class Admin(models.Model):
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    dni = models.CharField(max_length=8, unique=True)
+
+    def __str__(self):
+        return f"{self.usuario.first_name} {self.usuario.last_name}"
 
 class Plan (models.Model):
     id_plan = models.AutoField(primary_key=True)
