@@ -242,6 +242,7 @@ def estado_matricula(request):
     return render(request, 'estado.html', {'matricula': matricula})
 
 @login_required
+@consejero_required
 def aprobar_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
@@ -276,6 +277,7 @@ def aprobar_matricula(request, matricula_id):
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
 @login_required
+@consejero_required
 def rechazar_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
