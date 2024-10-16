@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
 from django.utils import timezone
-from .decorators import consejero_required
+from .decorators import alumno_required, consejero_required, admin_required, admin_o_consejero_required
 from django.db.models import Max
 from django.http import HttpResponse
 from django.template import Context
@@ -91,18 +91,16 @@ def recuperar_contrasena(request):
     return render(request, 'recuperar_contrasena.html', {'form': form})
 
 @login_required
+@alumno_required
 def perfil(request, username):
     usuario = get_object_or_404(Usuario, username=username) 
-    if usuario.rol == 'consejero':
-        return redirect('home') 
     alumno = usuario.alumno
     return render(request, 'perfil.html', {'usuario': usuario, 'alumno': alumno})
 
 @login_required
+@alumno_required
 def matricula(request):
     usuario = request.user
-    if usuario.rol == 'consejero':
-        return redirect('home') 
     alumno = get_object_or_404(Usuario, username=usuario.username).alumno
 
     form_filtrar = FiltrarCursosForm()
@@ -191,13 +189,9 @@ def matricula(request):
     })
 
 @login_required
-@login_required
+@alumno_required
 def historial(request):
     usuario = request.user
-
-    if usuario.rol == 'consejero':
-        return redirect('home')
-
     try:
         alumno = get_object_or_404(Alumno, codigo=usuario.alumno.codigo)
         matricula = Matricula.objects.filter(alumno=alumno).latest('fecha_matricula')
@@ -212,7 +206,7 @@ def historial(request):
     }
     return render(request, 'historial.html', context)
 
-
+@login_required
 @consejero_required
 def solicitud(request):
     matriculas = Matricula.objects.filter(
@@ -226,10 +220,10 @@ def solicitud(request):
     return render(request, 'solicitud.html', context)
 
 @login_required
-@consejero_required
+@admin_o_consejero_required
 def ver_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
-    cursos = matricula.cursos.all()  # Obtener los cursos de la matrícula
+    cursos = matricula.cursos.all() 
     
     from_inscripciones = request.GET.get('from_inscripciones', False)
 
@@ -239,43 +233,27 @@ def ver_matricula(request, matricula_id):
         'from_inscripciones': from_inscripciones,
     })
     
-# Función para renderizar el estado de matrícula
+@login_required
+@alumno_required
 def estado_matricula(request):
-
     usuario = request.user
-    
-    # Verificar si el usuario tiene el rol de consejero
-    if usuario.rol == 'consejero':
-        return redirect('home')  # Redirigir al home si es consejero
-    
-    # Obtener el alumno vinculado al usuario
     alumno = usuario.alumno
-    
-    # Buscar la última matrícula del alumno
     matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()
-
-    # Renderizar el estado de la matrícula
     return render(request, 'estado.html', {'matricula': matricula})
 
-
+@login_required
 def aprobar_matricula(request, matricula_id):
-    # Obtener la matrícula por su ID
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
     if request.method == 'POST':
-        # Obtener el mensaje de aprobación del formulario
         mensaje_aprobacion = request.POST.get('mensaje_aprobacion', '').strip()
-
-        # Verifica que haya un mensaje de aprobación antes de aprobar
         if mensaje_aprobacion:
-            # Usamos una transacción atómica para garantizar que todas las operaciones sean consistentes
             try:
                 with transaction.atomic():
                     matricula.estado = 'aprobado'
-                    matricula.mensaje_aprobacion = mensaje_aprobacion  # Guardar el mensaje de aprobación
+                    matricula.mensaje_aprobacion = mensaje_aprobacion 
                     matricula.save()
 
-                    # Descontar cupos de los cursos seleccionados
                     for curso in matricula.cursos.all():
                         if curso.cupos_disponibles > 0:
                             curso.cupos_disponibles -= 1
@@ -285,38 +263,30 @@ def aprobar_matricula(request, matricula_id):
                             
                     messages.success(request, "Matrícula aprobada exitosamente.")
             except ValueError as e:
-                # Si ocurre un error (por ejemplo, cupos insuficientes), mostramos el mensaje de error
                 messages.error(request, str(e))
                 return render(request, 'ver.html', {
                     'matricula': matricula,
                     'error': str(e)
                 })
         else:
-            # Si no hay mensaje, puedes agregar una lógica para manejar el error
             return render(request, 'ver.html', {
                 'matricula': matricula,
                 'error': 'Debes proporcionar un motivo de aprobación.'
             })
-
-    # Redirigir a la misma página o a una página de confirmación
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
-
-
-
+@login_required
 def rechazar_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
     if request.method == 'POST':
         mensaje_rechazo = request.POST.get('mensaje_rechazo', '').strip()
 
-        # Verifica que haya un mensaje de rechazo antes de rechazar
         if mensaje_rechazo:
             matricula.estado = 'rechazado'
             matricula.mensaje_rechazo = mensaje_rechazo
             matricula.save()
         else:
-            # Si no hay mensaje, puedes agregar una lógica para manejar el error
             return render(request, 'ver.html', {
                 'matricula': matricula,
                 'error': 'Debes proporcionar un motivo de rechazo.'
@@ -324,6 +294,7 @@ def rechazar_matricula(request, matricula_id):
 
     return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
+@login_required
 def detalles_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -342,6 +313,7 @@ def render_to_pdf(template_src, context_dict={}):
         return HttpResponse('Error al generar el PDF')
     return response
 
+@login_required
 def constancia_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -354,6 +326,7 @@ def constancia_matricula(request, matricula_id):
 
     return render_to_pdf('imprimir.html', context)
 
+@login_required
 def ver_constancia_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -361,6 +334,7 @@ def ver_constancia_matricula(request, matricula_id):
 
     return render(request, 'imprimir.html', {'matricula': matricula, 'cursos': cursos, 'total_creditos': total_creditos})
 
+@login_required
 def send_pdf_email(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
 
@@ -385,9 +359,8 @@ def send_pdf_email(request, matricula_id):
     return HttpResponse('Correo enviado exitosamente.')
 
 @login_required
-@consejero_required
+@admin_required
 def inscripciones(request):
-    # Filtrar las matrículas por estado
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
