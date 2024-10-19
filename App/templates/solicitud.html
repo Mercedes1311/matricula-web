@@ -9,6 +9,7 @@
             <tr>
                 <th>Código Alumno</th>
                 <th>Nombre Completo</th>
+                <th>Estado</th> 
                 <th>Opciones</th>
             </tr>
         </thead>
@@ -17,6 +18,19 @@
             <tr>
                 <td>{{ matricula.alumno.codigo }}</td>
                 <td>{{ matricula.alumno.nombres }} {{ matricula.alumno.apellido_paterno }} {{ matricula.alumno.apellido_materno }}</td>
+                <td>
+                    <span class="estado {% if matricula.estado == 'pendiente' %}pendiente{% elif matricula.estado == 'aprobado' %}aprobado{% elif matricula.estado == 'rechazado' %}rechazado{% endif %}">
+                        {% if matricula.estado == 'pendiente' %}
+                            Pendiente
+                        {% elif matricula.estado == 'aprobado' %}
+                            Aprobado
+                        {% elif matricula.estado == 'rechazado' %}
+                            Rechazado
+                        {% else %}
+                            Desconocido
+                        {% endif %}
+                    </span>
+                </td>
                 <td>
                     <a href="{% url 'ver_matricula' matricula.id_matricula %}" class="btn btn-primary">Ver matrícula</a>
                 </td>
@@ -28,6 +42,5 @@
             {% endfor %}
         </tbody>
     </table>
-</div>     
-    
+</div>
 {% endblock %}
