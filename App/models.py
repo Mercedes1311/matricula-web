@@ -16,6 +16,13 @@ class Consejero(models.Model):
 
     def __str__(self):
         return f"{self.usuario.first_name} {self.usuario.last_name}"
+    
+class Admin(models.Model):
+    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
+    dni = models.CharField(max_length=8, unique=True)
+
+    def __str__(self):
+        return f"{self.usuario.first_name} {self.usuario.last_name}"
 
 class Plan (models.Model):
     id_plan = models.AutoField(primary_key=True)
@@ -64,8 +71,7 @@ class Curso(models.Model):
         blank=True, 
     )
     anio = models.IntegerField(default=1)
-    cupos_disponibles = models.IntegerField(default=30)  # Agregar este campo para cupos disponibles
-
+    cupos_disponibles = models.IntegerField(default=30)
 
     def __str__(self):
         return f"{self.codigo} - {self.nombre_curso} ({self.turno}{self.seccion})"

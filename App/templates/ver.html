@@ -52,7 +52,6 @@
         {% if matricula.estado == 'pendiente' and not from_inscripciones %}
             <button id="aprobar-btn" class="btn btn-success">Aprobar</button>
 
-            <!-- Formulario para la aprobación -->
             <div id="aprobacion-form" style="display:none; margin-top:20px;">
                 <form action="{% url 'aprobar_matricula' matricula.id_matricula %}" method="POST" style="margin-top: 10px;">
                     {% csrf_token %}
@@ -69,10 +68,8 @@
     <!-- Botón para rechazar la matrícula -->
     <div style="margin-top: 20px;">
         {% if matricula.estado == 'pendiente' and not from_inscripciones %}
-            <!-- Botón de rechazar que abre el formulario -->
             <button id="rechazar-btn" class="btn btn-danger">Rechazar</button>
     
-            <!-- Formulario para el rechazo -->
             <div id="rechazo-form" style="display:none; margin-top:20px;">
                 <form action="{% url 'rechazar_matricula' matricula.id_matricula %}" method="POST">
                     {% csrf_token %}
