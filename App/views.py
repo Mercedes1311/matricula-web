@@ -14,6 +14,7 @@ from xhtml2pdf import pisa
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.db import transaction
+from django.db.models import Count, Q
 
 
 @login_required
@@ -366,7 +367,7 @@ def inscripciones(request):
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
-
+    
     context = {
         'matriculas_aprobadas': matriculas_aprobadas,
         'matriculas_rechazadas': matriculas_rechazadas,
@@ -374,3 +375,30 @@ def inscripciones(request):
     }
 
     return render(request, 'inscripcion.html', context)
+
+@admin_required
+def reporte(request):
+    matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
+    matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
+    matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
+
+    conteo_por_anio = {
+        anio: {
+            'aprobadas': Matricula.objects.filter(alumno__anio=anio, estado='aprobado').count(),
+            'rechazadas': Matricula.objects.filter(alumno__anio=anio, estado='rechazado').count(),
+            'pendientes': Matricula.objects.filter(alumno__anio=anio, estado='pendiente').count()
+        }
+        for anio in range(1, 6)
+    }
+
+    total_aprobadas = matriculas_aprobadas.count()
+    total_rechazadas = matriculas_rechazadas.count()
+    total_pendientes = matriculas_pendientes.count()
+
+    context = {
+        'total_aprobadas': total_aprobadas,
+        'total_rechazadas': total_rechazadas,
+        'total_pendientes': total_pendientes,
+        'conteo_por_anio': conteo_por_anio,
+    }
+    return render(request, 'reporte.html', context)
