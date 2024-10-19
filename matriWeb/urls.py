@@ -22,4 +22,5 @@ urlpatterns = [
     path('ver_constancia_matricula/<int:matricula_id>/', views.ver_constancia_matricula, name='ver_constancia_matricula'),
     path('enviar_pdf/<int:matricula_id>/', views.send_pdf_email, name='enviar_pdf'),
     path('inscripciones/', views.inscripciones, name='inscripciones'),
+    path('reporte/', views.reporte, name='reporte'),
 ]
