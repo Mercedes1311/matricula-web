@@ -16,7 +16,6 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import Count, Q
 
-
 @login_required
 def home(request):
     return render(request, "home.html")
@@ -157,7 +156,7 @@ def matricula(request):
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
             curso = get_object_or_404(Curso, id=int(curso_id))
-                # Verificar si el curso aún tiene cupos disponibles
+            
             if curso.cupos_disponibles > 0:
                 creditos_actuales = sum(curso.creditos for curso in Curso.objects.filter(id__in=cursos_seleccionados))
 
@@ -175,7 +174,6 @@ def matricula(request):
             if curso_id and int(curso_id) in cursos_seleccionados:
                 cursos_seleccionados.remove(int(curso_id))
                 request.session['cursos_seleccionados'] = cursos_seleccionados
-
 
     cursos_en_canasta = Curso.objects.filter(id__in=cursos_seleccionados)
     creditos_actuales = sum(curso.creditos for curso in cursos_en_canasta)
@@ -233,7 +231,7 @@ def ver_matricula(request, matricula_id):
         'cursos': cursos,
         'from_inscripciones': from_inscripciones,
     })
-    
+
 @login_required
 @alumno_required
 def estado_matricula(request):
