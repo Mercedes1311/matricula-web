@@ -19,6 +19,31 @@
             min-height: 100vh;
         }
 
+        .cards {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .card {
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: calc(33% - 1rem);
+            border-radius: 10px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
         .container {
             display: flex;
             width: 100%;
@@ -385,6 +410,10 @@
                 width: 100%;
             }
         }
+
+        .tabla-inscripcion {
+            margin-top: 0px !important;
+        }
         
         .tabla-canasta {
         width: 100%;
@@ -583,6 +612,12 @@
                             <a href="{% url 'inscripciones' %}">
                                 <i class="bi bi-book"></i>
                                 Inscripciones
+                            </a>
+                        </li>
+                        <li class="nav-link">
+                            <a href="{% url 'reporte' %}">
+                                <i class="bi bi-file-earmark-text"></i>
+                                Reporte
                             </a>
                         </li>
                         <li class="nav-link">
