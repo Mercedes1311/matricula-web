@@ -572,60 +572,68 @@
                 </div>
                 <nav>
                     <ul>
-                        <li class="nav-link">
-                            <a href="{% url 'home' %}">
-                                <i class="bi bi-house-door"></i>
-                                Inicio
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'perfil' username=request.user.username %}">
-                                <i class="bi bi-person"></i>
-                                Perfil
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'matricula' %}">
-                                <i class="bi bi-envelope-paper"></i>
-                                Matrícula
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'historial' %}">
-                                <i class="bi bi-book"></i>
-                                Historial
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'estado_matricula' %}">
-                                <i class="bi bi-calendar-check"></i>
-                                Estado de matrícula
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'solicitud' %}">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Solicitudes
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'inscripciones' %}">
-                                <i class="bi bi-book"></i>
-                                Inscripciones
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'reporte' %}">
-                                <i class="bi bi-file-earmark-text"></i>
-                                Reporte
-                            </a>
-                        </li>
-                        <li class="nav-link">
-                            <a href="{% url 'signout' %}">
-                                <i class="bi bi-box-arrow-left"></i>
-                                Cerrar Sesión
-                            </a>
-                        </li>
+                        {% if request.user.is_authenticated %}
+                            <li class="nav-link">
+                                <a href="{% url 'home' %}">
+                                    <i class="bi bi-house-door"></i>
+                                    Inicio
+                                </a>
+                            </li>
+                            {% if request.user.rol == 'alumno' %}
+                            <li class="nav-link">
+                                <a href="{% url 'perfil' username=request.user.username %}">
+                                    <i class="bi bi-person"></i>
+                                    Perfil
+                                </a>
+                            </li>
+                            <li class="nav-link">
+                                <a href="{% url 'matricula' %}">
+                                    <i class="bi bi-envelope-paper"></i>
+                                    Matrícula
+                                </a>
+                            </li>
+                            <li class="nav-link">
+                                <a href="{% url 'historial' %}">
+                                    <i class="bi bi-book"></i>
+                                    Historial
+                                </a>
+                            </li>
+                            <li class="nav-link">
+                                <a href="{% url 'estado_matricula' %}">
+                                    <i class="bi bi-calendar-check"></i>
+                                    Estado de matrícula
+                                </a>
+                            </li>
+                            {% elif request.user.rol == 'consejero' %}
+                            <li class="nav-link">
+                                <a href="{% url 'solicitud' %}">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Solicitudes
+                                </a>
+                            </li>
+                            {% elif request.user.rol == 'admin' %}
+                            <li class="nav-link">
+                                <a href="{% url 'inscripciones' %}">
+                                    <i class="bi bi-book"></i>
+                                    Inscripciones
+                                </a>
+                            </li>
+                            <li class="nav-link">
+                                <a href="{% url 'reporte' %}">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                    Reporte
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li class="nav-link">
+                                <a href="{% url 'signout' %}">
+                                    <i class="bi bi-box-arrow-left"></i>
+                                    Cerrar Sesión
+                                </a>
+                            </li>
+                        {% else %}
+                            <p>Por favor, inicia sesión.</p>
+                        {% endif %}
                     </ul>
                 </nav>
             </aside>
