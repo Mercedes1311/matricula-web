@@ -86,12 +86,12 @@ class CursoPrerrequisito(models.Model):
 
 class Boucher(models.Model):
     id_boucher = models.AutoField(primary_key=True)
-    alumno = models.ForeignKey(Alumno, on_delete=models.CASCADE)
-    numero_boucher = models.CharField(max_length=50)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    codigo_boucher = models.CharField(max_length=10)
+    codigo_alumno = models.CharField(max_length=10)
+    monto = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return f"Boucher {self.numero_boucher} - {self.alumno}"
+        return f"Boucher {self.codigo_boucher} - {self.alumno} - S/{self.monto}"
 
 class Matricula(models.Model):
     id_matricula = models.AutoField(primary_key=True)
