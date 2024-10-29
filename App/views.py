@@ -5,7 +5,7 @@ from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula, BoucherBanco
 from django.utils import timezone
-from .decorators import alumno_required, consejero_required, admin_required, admin_o_consejero_required
+from .decorators import alumno_required, consejero_required, administrador_required, administrador_o_consejero_required
 from django.db.models import Max
 from django.http import HttpResponse
 from django.template import Context
@@ -140,12 +140,14 @@ def matricula(request):
                     monto=monto_recibo1,
                     codigo_alumno=alumno.codigo
                 ).first()
+                print(boucher1)
 
                 boucher2 = BoucherBanco.objects.filter(
                     codigo_boucher=numero_recibo2, 
                     monto=monto_recibo2,
                     codigo_alumno=alumno.codigo
                 ).first()
+                print(boucher2)
 
                 if not boucher1 or not boucher2:
                     messages.error(request, "Uno o ambos bouchers son inválidos o no pertenecen al alumno.")
@@ -171,7 +173,7 @@ def matricula(request):
                     matricula.boucher.add(boucher1, boucher2)  
 
                     request.session['cursos_seleccionados'] = []
-                    messages.success(request, "Matrícula guardada con éxito.")
+                    return redirect('historial')
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
@@ -239,7 +241,7 @@ def solicitud(request):
     return render(request, 'solicitud.html', context)
 
 @login_required
-@admin_o_consejero_required
+@administrador_o_consejero_required
 def ver_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -380,7 +382,7 @@ def send_pdf_email(request, matricula_id):
     return HttpResponse('Correo enviado exitosamente.')
 
 @login_required
-@admin_required
+@administrador_required
 def inscripciones(request):
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
@@ -394,7 +396,7 @@ def inscripciones(request):
 
     return render(request, 'inscripcion.html', context)
 
-@admin_required
+@administrador_required
 def reporte(request):
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
     matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
