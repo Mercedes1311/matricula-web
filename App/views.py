@@ -3,7 +3,7 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
-from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula
+from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula, BoucherBanco
 from django.utils import timezone
 from .decorators import alumno_required, consejero_required, admin_required, admin_o_consejero_required
 from django.db.models import Max
@@ -130,28 +130,48 @@ def matricula(request):
         elif 'guardar_matricula' in request.POST:
             form_matricula = MatriculaForm(request.POST)
             if form_matricula.is_valid():
-                boucher1 = Boucher.objects.create(
-                    alumno=alumno,
-                    numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
-                    monto=form_matricula.cleaned_data['monto_recibo1']
-                )
+                numero_recibo1 = form_matricula.cleaned_data['numero_recibo1']
+                monto_recibo1 = form_matricula.cleaned_data['monto_recibo1']
+                numero_recibo2 = form_matricula.cleaned_data['numero_recibo2']
+                monto_recibo2 = form_matricula.cleaned_data['monto_recibo2']
 
-                boucher2 = Boucher.objects.create(
-                    alumno=alumno,
-                    numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
-                    monto=form_matricula.cleaned_data['monto_recibo2']
-                )
+                boucher1 = BoucherBanco.objects.filter(
+                    codigo_boucher=numero_recibo1, 
+                    monto=monto_recibo1,
+                    codigo_alumno=alumno.codigo
+                ).first()
 
-                matricula = Matricula.objects.create(
-                    alumno=alumno,
-                    plan=alumno.plan,
-                    fecha_matricula=timezone.now()
-                )
-                matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
-                matricula.boucher.add(boucher1, boucher2)  
+                boucher2 = BoucherBanco.objects.filter(
+                    codigo_boucher=numero_recibo2, 
+                    monto=monto_recibo2,
+                    codigo_alumno=alumno.codigo
+                ).first()
 
-                request.session['cursos_seleccionados'] = []
-                messages.success(request, "Matrícula guardada con éxito.")
+                if not boucher1 or not boucher2:
+                    messages.error(request, "Uno o ambos bouchers son inválidos o no pertenecen al alumno.")
+                else:
+                    boucher1 = Boucher.objects.create(
+                        alumno=alumno,
+                        numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
+                        monto=form_matricula.cleaned_data['monto_recibo1']
+                    )
+
+                    boucher2 = Boucher.objects.create(
+                        alumno=alumno,
+                        numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
+                        monto=form_matricula.cleaned_data['monto_recibo2']
+                    )
+
+                    matricula = Matricula.objects.create(
+                        alumno=alumno,
+                        plan=alumno.plan,
+                        fecha_matricula=timezone.now()
+                    )
+                    matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
+                    matricula.boucher.add(boucher1, boucher2)  
+
+                    request.session['cursos_seleccionados'] = []
+                    messages.success(request, "Matrícula guardada con éxito.")
 
         elif 'curso_id' in request.POST:
             curso_id = request.POST.get('curso_id')
