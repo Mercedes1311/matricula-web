@@ -4,6 +4,17 @@
   <div class="Datos_Matricula">        
     <h1>Matrícula de Cursos</h1>
 
+    {% if messages %}
+      {% for message in messages %}
+        {% if forloop.first %}
+          <div class="alert alert-error">
+            {{ message }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
+
     <div class="Datos_Alumno">
       <h3>Datos del Alumno</h3>
       <p><strong>Código:</strong> {{ alumno.codigo }}</p>
@@ -111,4 +122,18 @@
       </form>
     </div>
   </div>
+  <style>
+    .alert-container {
+      margin-bottom: 15px;
+    }
+  
+    .alert-error {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 5px;
+      border: 1px solid #f5c6cb;
+    }
+  </style>
 {% endblock %}
