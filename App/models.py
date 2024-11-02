@@ -106,3 +106,12 @@ class Matricula(models.Model):
 
     def __str__(self):
         return f"Matricula {self.id_matricula} - Alumno: {self.alumno} - Estado: {self.estado}"
+
+class BoucherBanco(models.Model):
+    id_boucher = models.AutoField(primary_key=True)
+    codigo_boucher = models.CharField(max_length=10)
+    codigo_alumno = models.CharField(max_length=10)
+    monto = models.DecimalField(max_digits=5, decimal_places=2)
+
+    def __str__(self):
+        return f"Boucher Banco {self.codigo_boucher} - Alumno {self.codigo_alumno} - S/{self.monto}"
