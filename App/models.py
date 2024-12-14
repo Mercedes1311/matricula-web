@@ -5,18 +5,10 @@ from django.utils import timezone
 class Usuario(AbstractUser):
     ROLES = [
         ('alumno', 'Alumno'),
-        ('consejero', 'Consejero'),
     ]
     rol = models.CharField(max_length=10, choices=ROLES)
     alumno = models.OneToOneField('Alumno', on_delete=models.CASCADE, null=True, blank=True)
 
-class Consejero(models.Model):
-    usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
-    dni = models.CharField(max_length=8, unique=True)
-
-    def __str__(self):
-        return f"{self.usuario.first_name} {self.usuario.last_name}"
-    
 class Admin(models.Model):
     usuario = models.OneToOneField(Usuario, on_delete=models.CASCADE)
     dni = models.CharField(max_length=8, unique=True)
