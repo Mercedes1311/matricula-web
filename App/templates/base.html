@@ -604,6 +604,7 @@
                                     Detalle de matrícula
                                 </a>
                             </li>
+
                             {% elif request.user.rol == 'consejero' %}
                             <li class="nav-link">
                                 <a href="{% url 'solicitud' %}">
@@ -611,6 +612,7 @@
                                     Solicitudes
                                 </a>
                             </li>
+
                             {% elif request.user.rol == 'administrador' %}
                             <li class="nav-link">
                                 <a href="{% url 'inscripciones' %}">
