@@ -29,57 +29,5 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <h2>Matrículas Rechazadas</h2>
-    <table class="tabla-canasta tabla-inscripcion">
-        <thead>
-            <tr>
-                <th>Código Alumno</th>
-                <th>Nombre Completo</th>
-                <th>Opciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for matricula in matriculas_rechazadas %}
-            <tr>
-                <td>{{ matricula.alumno.codigo }}</td>
-                <td>{{ matricula.alumno.nombres }} {{ matricula.alumno.apellido_paterno }} {{ matricula.alumno.apellido_materno }}</td>
-                <td>
-                    <a href="{% url 'ver_matricula' matricula.id_matricula %}" class="btn btn-primary">Ver matrícula</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No hay matrículas rechazadas.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <h2>Matrículas Pendientes</h2>
-    <table class="tabla-canasta tabla-inscripcion">
-        <thead>
-            <tr>
-                <th>Código Alumno</th>
-                <th>Nombre Completo</th>
-                <th>Opciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for matricula in matriculas_pendientes %}
-            <tr>
-                <td>{{ matricula.alumno.codigo }}</td>
-                <td>{{ matricula.alumno.nombres }} {{ matricula.alumno.apellido_paterno }} {{ matricula.alumno.apellido_materno }}</td>
-                <td>
-                    <a href="{% url 'ver_matricula' matricula.id_matricula %}?from_inscripciones=True" class="btn btn-primary">Ver matrícula</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3">No hay matrículas pendientes.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 {% endblock %}

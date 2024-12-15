@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula, BoucherBanco
+from .decorators import alumno_required, administrador_required
 from django.utils import timezone
-from .decorators import alumno_required, consejero_required, administrador_required, administrador_o_consejero_required
 from django.db.models import Max
 from django.http import HttpResponse
 from django.template import Context
@@ -131,46 +131,42 @@ def matricula(request):
             form_matricula = MatriculaForm(request.POST)
             if form_matricula.is_valid():
                 numero_recibo1 = form_matricula.cleaned_data['numero_recibo1']
-                monto_recibo1 = form_matricula.cleaned_data['monto_recibo1']
                 numero_recibo2 = form_matricula.cleaned_data['numero_recibo2']
-                monto_recibo2 = form_matricula.cleaned_data['monto_recibo2']
-
+                
                 boucher1 = BoucherBanco.objects.filter(
                     codigo_boucher=numero_recibo1, 
-                    monto=monto_recibo1,
                     codigo_alumno=alumno.codigo
                 ).first()
-                print(boucher1)
 
                 boucher2 = BoucherBanco.objects.filter(
-                    codigo_boucher=numero_recibo2, 
-                    monto=monto_recibo2,
+                    codigo_boucher=numero_recibo2,
                     codigo_alumno=alumno.codigo
                 ).first()
-                print(boucher2)
 
                 if not boucher1 or not boucher2:
                     messages.error(request, "Uno o ambos bouchers son inválidos o no pertenecen al alumno.")
                 else:
-                    boucher1 = Boucher.objects.create(
+                    boucher1_nuevo = Boucher.objects.create(
                         alumno=alumno,
-                        numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
-                        monto=form_matricula.cleaned_data['monto_recibo1']
+                        numero_boucher=boucher1.codigo_boucher,
+                        monto=boucher1.monto
                     )
 
-                    boucher2 = Boucher.objects.create(
+                    boucher2_nuevo = Boucher.objects.create(
                         alumno=alumno,
-                        numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
-                        monto=form_matricula.cleaned_data['monto_recibo2']
+                        numero_boucher=boucher2.codigo_boucher,
+                        monto=boucher2.monto
                     )
 
+                    # Crear la matrícula y asignarla como aprobada
                     matricula = Matricula.objects.create(
                         alumno=alumno,
                         plan=alumno.plan,
-                        fecha_matricula=timezone.now()
+                        fecha_matricula=timezone.now(),
+                        estado='aprobado'  # Estado aprobado sin necesidad de consejero
                     )
                     matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
-                    matricula.boucher.add(boucher1, boucher2)  
+                    matricula.boucher.add(boucher1_nuevo, boucher2_nuevo)  
 
                     request.session['cursos_seleccionados'] = []
                     return redirect('historial')
@@ -189,7 +185,6 @@ def matricula(request):
                     messages.error(request, "No puedes añadir más cursos. El límite es 44 créditos.")
             else:
                 messages.error(request, "Este curso ya no tiene cupos disponibles.")
-
 
         elif 'eliminar_curso_id' in request.POST:
             curso_id = request.POST.get('eliminar_curso_id')
@@ -228,20 +223,7 @@ def historial(request):
     return render(request, 'historial.html', context)
 
 @login_required
-@consejero_required
-def solicitud(request):
-    matriculas = Matricula.objects.filter(
-        id_matricula__in=Matricula.objects.values('alumno').annotate(ultima_matricula=Max('id_matricula')).values('ultima_matricula')
-    ).select_related('alumno').order_by('-fecha_matricula')
-
-    context = {
-        'matriculas': matriculas
-    }
-
-    return render(request, 'solicitud.html', context)
-
-@login_required
-@administrador_o_consejero_required
+@administrador_required
 def ver_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -261,61 +243,6 @@ def estado_matricula(request):
     alumno = usuario.alumno
     matricula = Matricula.objects.filter(alumno=alumno).order_by('-fecha_matricula').first()
     return render(request, 'estado.html', {'matricula': matricula})
-
-@login_required
-@consejero_required
-def aprobar_matricula(request, matricula_id):
-    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
-
-    if request.method == 'POST':
-        mensaje_aprobacion = request.POST.get('mensaje_aprobacion', '').strip()
-        if mensaje_aprobacion:
-            try:
-                with transaction.atomic():
-                    matricula.estado = 'aprobado'
-                    matricula.mensaje_aprobacion = mensaje_aprobacion 
-                    matricula.save()
-
-                    for curso in matricula.cursos.all():
-                        if curso.cupos_disponibles > 0:
-                            curso.cupos_disponibles -= 1
-                            curso.save()
-                        else:
-                            raise ValueError(f"El curso {curso.nombre_curso} ya no tiene cupos disponibles.")
-                            
-                    messages.success(request, "Matrícula aprobada exitosamente.")
-            except ValueError as e:
-                messages.error(request, str(e))
-                return render(request, 'ver.html', {
-                    'matricula': matricula,
-                    'error': str(e)
-                })
-        else:
-            return render(request, 'ver.html', {
-                'matricula': matricula,
-                'error': 'Debes proporcionar un motivo de aprobación.'
-            })
-    return redirect('ver_matricula', matricula_id=matricula.id_matricula)
-
-@login_required
-@consejero_required
-def rechazar_matricula(request, matricula_id):
-    matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
-
-    if request.method == 'POST':
-        mensaje_rechazo = request.POST.get('mensaje_rechazo', '').strip()
-
-        if mensaje_rechazo:
-            matricula.estado = 'rechazado'
-            matricula.mensaje_rechazo = mensaje_rechazo
-            matricula.save()
-        else:
-            return render(request, 'ver.html', {
-                'matricula': matricula,
-                'error': 'Debes proporcionar un motivo de rechazo.'
-            })
-
-    return redirect('ver_matricula', matricula_id=matricula.id_matricula)
 
 @login_required
 def detalles_matricula(request, matricula_id):
@@ -385,40 +312,32 @@ def send_pdf_email(request, matricula_id):
 @administrador_required
 def inscripciones(request):
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
-    matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
-    matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
-    
+
     context = {
         'matriculas_aprobadas': matriculas_aprobadas,
-        'matriculas_rechazadas': matriculas_rechazadas,
-        'matriculas_pendientes': matriculas_pendientes,
     }
 
     return render(request, 'inscripcion.html', context)
 
 @administrador_required
 def reporte(request):
+    # Solo contar y mostrar las matrículas aprobadas
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
-    matriculas_rechazadas = Matricula.objects.filter(estado='rechazado').select_related('alumno').order_by('-fecha_matricula')
-    matriculas_pendientes = Matricula.objects.filter(estado='pendiente').select_related('alumno').order_by('-fecha_matricula')
 
+    # Solo contar las matrículas aprobadas
+    total_aprobadas = matriculas_aprobadas.count()
+
+    # Conteo por año solo para matrículas aprobadas
     conteo_por_anio = {
         anio: {
             'aprobadas': Matricula.objects.filter(alumno__anio=anio, estado='aprobado').count(),
-            'rechazadas': Matricula.objects.filter(alumno__anio=anio, estado='rechazado').count(),
-            'pendientes': Matricula.objects.filter(alumno__anio=anio, estado='pendiente').count()
         }
         for anio in range(1, 6)
     }
 
-    total_aprobadas = matriculas_aprobadas.count()
-    total_rechazadas = matriculas_rechazadas.count()
-    total_pendientes = matriculas_pendientes.count()
-
     context = {
         'total_aprobadas': total_aprobadas,
-        'total_rechazadas': total_rechazadas,
-        'total_pendientes': total_pendientes,
         'conteo_por_anio': conteo_por_anio,
     }
+    
     return render(request, 'reporte.html', context)

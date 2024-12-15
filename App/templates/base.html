@@ -601,9 +601,10 @@
                             <li class="nav-link">
                                 <a href="{% url 'estado_matricula' %}">
                                     <i class="bi bi-calendar-check"></i>
-                                    Estado de matrícula
+                                    Detalle de matrícula
                                 </a>
                             </li>
+
                             {% elif request.user.rol == 'consejero' %}
                             <li class="nav-link">
                                 <a href="{% url 'solicitud' %}">
@@ -611,6 +612,7 @@
                                     Solicitudes
                                 </a>
                             </li>
+
                             {% elif request.user.rol == 'administrador' %}
                             <li class="nav-link">
                                 <a href="{% url 'inscripciones' %}">

@@ -4,44 +4,31 @@
 <div class="Datos_Matricula" style="margin-left: 260px;">
     <h1>Reporte</h1>
     <div class="cards">
+        <!-- Bloques de tarjetas solo para Aprobadas -->
         <div class="card">
             <div class="card-body">
                 Aprobadas
             </div> 
             <p class="card-text">{{ total_aprobadas }}</p>
         </div>
-        <div class="card">
-            <div class="card-body">
-                Rechazadas
-            </div>
-            <p class="card-text">{{ total_rechazadas }}</p>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                Pendientes
-            </div>
-            <p class="card-text">{{ total_pendientes }}</p>
-        </div>
     </div>
-        <table class="tabla-canasta tabla-inscripcion">
-            <thead>
-                <tr>
-                    <th>Año</th>
-                    <th>Aprobadas</th>
-                    <th>Rechazadas</th>
-                    <th>Pendientes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for anio, conteo in conteo_por_anio.items %}
-                <tr>
-                    <td>{{ anio }}º Año</td>
-                    <td>{{ conteo.aprobadas }}</td>
-                    <td>{{ conteo.rechazadas }}</td>
-                    <td>{{ conteo.pendientes }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+    <!-- Tabla solo para matrículas aprobadas -->
+    <table class="tabla-canasta tabla-inscripcion">
+        <thead>
+            <tr>
+                <th>Año</th>
+                <th>Aprobadas</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for anio, conteo in conteo_por_anio.items %}
+            <tr>
+                <td>{{ anio }}º Año</td>
+                <td>{{ conteo.aprobadas }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 {% endblock %}
