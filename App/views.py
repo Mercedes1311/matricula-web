@@ -4,8 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import RegistroForm, LoginForm, MatriculaForm, FiltrarCursosForm, RecuperarContrasenaForm
 from .models import Alumno, Usuario, Curso, CursoPrerrequisito, Boucher, Matricula, BoucherBanco
+from .decorators import alumno_required, administrador_required
 from django.utils import timezone
-from .decorators import alumno_required, consejero_required, administrador_required, administrador_o_consejero_required
 from django.db.models import Max
 from django.http import HttpResponse
 from django.template import Context
@@ -223,20 +223,7 @@ def historial(request):
     return render(request, 'historial.html', context)
 
 @login_required
-@consejero_required
-def solicitud(request):
-    matriculas = Matricula.objects.filter(
-        id_matricula__in=Matricula.objects.values('alumno').annotate(ultima_matricula=Max('id_matricula')).values('ultima_matricula')
-    ).select_related('alumno').order_by('-fecha_matricula')
-
-    context = {
-        'matriculas': matriculas
-    }
-
-    return render(request, 'solicitud.html', context)
-
-@login_required
-@administrador_o_consejero_required
+@administrador_required
 def ver_matricula(request, matricula_id):
     matricula = get_object_or_404(Matricula, id_matricula=matricula_id)
     cursos = matricula.cursos.all() 
@@ -248,7 +235,7 @@ def ver_matricula(request, matricula_id):
         'cursos': cursos,
         'from_inscripciones': from_inscripciones,
     })
-    
+
 @login_required
 @alumno_required
 def estado_matricula(request):
@@ -324,14 +311,14 @@ def send_pdf_email(request, matricula_id):
 @login_required
 @administrador_required
 def inscripciones(request):
-    # Solo mostrar las matrículas aprobadas
     matriculas_aprobadas = Matricula.objects.filter(estado='aprobado').select_related('alumno').order_by('-fecha_matricula')
 
     context = {
-        'matriculas_aprobadas': matriculas_aprobadas,  # Solo las aprobadas
+        'matriculas_aprobadas': matriculas_aprobadas,
     }
 
     return render(request, 'inscripcion.html', context)
+
 @administrador_required
 def reporte(request):
     # Solo contar y mostrar las matrículas aprobadas
@@ -349,7 +336,7 @@ def reporte(request):
     }
 
     context = {
-        'total_aprobadas': total_aprobadas,  # Solo las aprobadas
+        'total_aprobadas': total_aprobadas,
         'conteo_por_anio': conteo_por_anio,
     }
     
