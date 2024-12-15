@@ -42,59 +42,6 @@
         {% endif %}
     </div>
 
-    <!-- Mostrar el mensaje si la matrícula está pendiente y fue accedida desde inscripciones -->
-    {% if matricula.estado == 'pendiente' and from_inscripciones %}
-        <p class="alert alert-info">Matrícula pendiente de evaluación.</p>
-    {% endif %}
-
-    <!-- Botón para aprobar la matrícula -->
-    <div style="margin-top: 20px;">
-        {% if matricula.estado == 'pendiente' and not from_inscripciones %}
-            <button id="aprobar-btn" class="btn btn-success">Aprobar</button>
-
-            <div id="aprobacion-form" style="display:none; margin-top:20px;">
-                <form action="{% url 'aprobar_matricula' matricula.id_matricula %}" method="POST" style="margin-top: 10px;">
-                    {% csrf_token %}
-                    <h3>Descripción de la aprobación</h3>
-                    <textarea name="mensaje_aprobacion" rows="4" cols="50" placeholder="Escribe la razón de la aprobación..."></textarea>
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </form>
-            </div>
-        {% elif matricula.estado == 'aprobado' %}
-        <p>La matrícula ha sido aprobada.</p>
-        {% endif %}
-    </div>
-
-    <!-- Botón para rechazar la matrícula -->
-    <div style="margin-top: 20px;">
-        {% if matricula.estado == 'pendiente' and not from_inscripciones %}
-            <button id="rechazar-btn" class="btn btn-danger">Rechazar</button>
-    
-            <div id="rechazo-form" style="display:none; margin-top:20px;">
-                <form action="{% url 'rechazar_matricula' matricula.id_matricula %}" method="POST">
-                    {% csrf_token %}
-                    <div>
-                        <h3>Descripción del rechazo</h3>
-                        <textarea name="mensaje_rechazo" rows="4" cols="50" placeholder="Escribe la razón del rechazo..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </form>
-            </div>
-        {% elif matricula.estado == 'rechazado' %}
-            <p>La matrícula ha sido rechazada.</p>
-        {% endif %}
-    </div>
 </div>
 
-<script>
-    document.getElementById('rechazar-btn').addEventListener('click', function() {
-        var rechazoForm = document.getElementById('rechazo-form');
-        rechazoForm.style.display = rechazoForm.style.display === 'none' ? 'block' : 'none';
-    });
-
-    document.getElementById('aprobar-btn').addEventListener('click', function() {
-        var aprobacionForm = document.getElementById('aprobacion-form');
-        aprobacionForm.style.display = aprobacionForm.style.display === 'none' ? 'block' : 'none';
-    });
-</script>
 {% endblock %}
