@@ -19,16 +19,8 @@
                 <td>{{ matricula.alumno.codigo }}</td>
                 <td>{{ matricula.alumno.nombres }} {{ matricula.alumno.apellido_paterno }} {{ matricula.alumno.apellido_materno }}</td>
                 <td>
-                    <span class="estado {% if matricula.estado == 'pendiente' %}pendiente{% elif matricula.estado == 'aprobado' %}aprobado{% elif matricula.estado == 'rechazado' %}rechazado{% endif %}">
-                        {% if matricula.estado == 'pendiente' %}
-                            Pendiente
-                        {% elif matricula.estado == 'aprobado' %}
-                            Aprobado
-                        {% elif matricula.estado == 'rechazado' %}
-                            Rechazado
-                        {% else %}
-                            Desconocido
-                        {% endif %}
+                    <span class="estado aprobado">
+                        Aprobado
                     </span>
                 </td>
                 <td>

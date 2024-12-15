@@ -7,7 +7,7 @@
     </div>
     <div class="estado-content">
         {% if matricula %}
-            <div class="estado-detalle">
+            <!-- <div class="estado-detalle">
                 <h3>Solicitud de matrícula:</h3>
                 <br>
                 <button class="estado-boton" disabled>{{ matricula.estado }}</button>
@@ -31,7 +31,7 @@
                         <p>{{ matricula.mensaje_aprobacion }}</p>
                     </div>
                 </div>
-            {% endif %}
+            {% endif %} -->
             <br />
             <a href="{% url 'detalles_matricula' matricula.id_matricula %}" class="btn-filter">Ver detalles de matrícula</a>
         {% else %}
