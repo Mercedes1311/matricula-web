@@ -131,35 +131,31 @@ def matricula(request):
             form_matricula = MatriculaForm(request.POST)
             if form_matricula.is_valid():
                 numero_recibo1 = form_matricula.cleaned_data['numero_recibo1']
-                monto_recibo1 = form_matricula.cleaned_data['monto_recibo1']
                 numero_recibo2 = form_matricula.cleaned_data['numero_recibo2']
-                monto_recibo2 = form_matricula.cleaned_data['monto_recibo2']
-
+                
                 boucher1 = BoucherBanco.objects.filter(
                     codigo_boucher=numero_recibo1, 
-                    monto=monto_recibo1,
                     codigo_alumno=alumno.codigo
                 ).first()
 
                 boucher2 = BoucherBanco.objects.filter(
-                    codigo_boucher=numero_recibo2, 
-                    monto=monto_recibo2,
+                    codigo_boucher=numero_recibo2,
                     codigo_alumno=alumno.codigo
                 ).first()
 
                 if not boucher1 or not boucher2:
                     messages.error(request, "Uno o ambos bouchers son inválidos o no pertenecen al alumno.")
                 else:
-                    boucher1 = Boucher.objects.create(
+                    boucher1_nuevo = Boucher.objects.create(
                         alumno=alumno,
-                        numero_boucher=form_matricula.cleaned_data['numero_recibo1'],
-                        monto=form_matricula.cleaned_data['monto_recibo1']
+                        numero_boucher=boucher1.codigo_boucher,
+                        monto=boucher1.monto
                     )
 
-                    boucher2 = Boucher.objects.create(
+                    boucher2_nuevo = Boucher.objects.create(
                         alumno=alumno,
-                        numero_boucher=form_matricula.cleaned_data['numero_recibo2'],
-                        monto=form_matricula.cleaned_data['monto_recibo2']
+                        numero_boucher=boucher2.codigo_boucher,
+                        monto=boucher2.monto
                     )
 
                     # Crear la matrícula y asignarla como aprobada
@@ -170,7 +166,7 @@ def matricula(request):
                         estado='aprobado'  # Estado aprobado sin necesidad de consejero
                     )
                     matricula.cursos.set(Curso.objects.filter(id__in=cursos_seleccionados))
-                    matricula.boucher.add(boucher1, boucher2)  
+                    matricula.boucher.add(boucher1_nuevo, boucher2_nuevo)  
 
                     request.session['cursos_seleccionados'] = []
                     return redirect('historial')
